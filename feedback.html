@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - AssignmentCheck</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 40px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feedback-box {
+            background: white;
+            max-width: 700px;
+            width: 100%;
+            padding: 45px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3);
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        label {
+            display: block;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #f5576c;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(245, 87, 108, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23475569' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            padding-right: 50px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 130px;
+        }
+
+        .rating-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .rating-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .rating-btn:hover {
+            border-color: #f5576c;
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .rating-btn.active {
+            border-color: #f5576c;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 30px;
+            padding: 16px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            font-size: 17px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(245, 87, 108, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .feedback-box {
+                padding: 30px 25px;
+            }
+            .rating-group {
+                flex-wrap: wrap;
+            }
+            .rating-btn {
+                flex-basis: calc(20% - 8px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="feedback-box">
+    <div class="header">
+        <div class="icon-wrapper">💬</div>
+        <h2>Feedback</h2>
+        <p>Your feedback helps us improve our platform</p>
+    </div>
+
+    <label>Full Name</label>
+    <input type="text" placeholder="Enter your name">
+
+    <label>Email</label>
+    <input type="email" placeholder="Enter your email">
+
+    <label>Feedback Type</label>
+    <select>
+        <option>General Feedback</option>
+        <option>Assessment Experience</option>
+        <option>Technical Issue</option>
+        <option>Suggestion</option>
+    </select>
+
+    <label>Rating</label>
+    <div class="rating-group">
+        <div class="rating-btn" onclick="selectRating(this)">⭐</div>
+        <div class="rating-btn" onclick="selectRating(this)">⭐⭐</div>
+        <div class="rating-btn" onclick="selectRating(this)">⭐⭐⭐</div>
+        <div class="rating-btn" onclick="selectRating(this)">⭐⭐⭐⭐</div>
+        <div class="rating-btn" onclick="selectRating(this)">⭐⭐⭐⭐⭐</div>
+    </div>
+
+    <label>Your Feedback</label>
+    <textarea placeholder="Write your feedback here..."></textarea>
+
+    <button onclick="submitFeedback()">Submit Feedback</button>
+</div>
+
+<script>
+function selectRating(element) {
+    document.querySelectorAll('.rating-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    element.classList.add('active');
+}
+
+function submitFeedback() {
+    alert('Thank you for your feedback!');
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Assessment - AssignmentCheck</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            animation: rotate 30s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .request-box {
+            background: white;
+            max-width: 650px;
+            width: 100%;
+            padding: 45px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.6s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .request-icon {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+            border-radius: 22px;
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 45px;
+            box-shadow: 0 10px 30px rgba(102, 166, 255, 0.3);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #475569;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        label span {
+            color: #ef4444;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #66a6ff;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 166, 255, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23475569' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            padding-right: 50px;
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+        .priority-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .priority-btn {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .priority-btn:hover {
+            border-color: #66a6ff;
+            background: white;
+        }
+
+        .priority-btn.active {
+            border-color: #66a6ff;
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 10px 30px rgba(102, 166, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 166, 255, 0.4);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #66a6ff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #89f7fe;
+        }
+
+        @media (max-width: 600px) {
+            .request-box {
+                padding: 35px 25px;
+            }
+            .priority-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="request-box">
+    <div class="header-section">
+        <div class="request-icon">✉️</div>
+        <h2>Request Assessment</h2>
+        <p class="subtitle">Submit a request for a new assessment</p>
+    </div>
+
+    <div class="form-section">
+        <label>Assessment Type <span>*</span></label>
+        <select>
+            <option value="">Select assessment type</option>
+            <option>Multiple Choice Questions (MCQ)</option>
+            <option>Essay Writing</option>
+            <option>Practical/Lab Test</option>
+            <option>Coding Challenge</option>
+            <option>Oral Examination</option>
+            <option>Project Evaluation</option>
+        </select>
+    </div>
+
+    <div class="form-section">
+        <label>Assessment Name <span>*</span></label>
+        <input type="text" placeholder="e.g., Advanced Programming Assessment">
+    </div>
+
+    <div class="form-section">
+        <label>Priority Level</label>
+        <div class="priority-selector">
+            <div class="priority-btn" onclick="selectPriority(this)">🔴 High</div>
+            <div class="priority-btn active" onclick="selectPriority(this)">🟡 Medium</div>
+            <div class="priority-btn" onclick="selectPriority(this)">🟢 Low</div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <label>Reason for Request <span>*</span></label>
+        <textarea id="reason" maxlength="500" placeholder="Explain why you need this assessment..." oninput="updateCharCount()"></textarea>
+        <div class="char-counter"><span id="charCount">0</span>/500</div>
+    </div>
+
+    <button onclick="submitRequest()">📤 Submit Request</button>
+    <a href="user.html" class="back-link">← Back to Dashboard</a>
+</div>
+
+<script>
+function selectPriority(element) {
+    document.querySelectorAll('.priority-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    element.classList.add('active');
+}
+
+function updateCharCount() {
+    const textarea = document.getElementById('reason');
+    const charCount = document.getElementById('charCount');
+    charCount.textContent = textarea.value.length;
+}
+
+function submitRequest() {
+    alert('Request submitted successfully! We will review it shortly.');
+}
+</script>
+
+</body>
+</html>

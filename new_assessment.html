@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Assessment - AssignmentCheck</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -200px;
+            left: -200px;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            bottom: -150px;
+            right: -150px;
+            animation: float 20s infinite ease-in-out reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        .assessment-box {
+            background: white;
+            max-width: 600px;
+            width: 100%;
+            padding: 50px 45px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            animation: zoomIn 0.6s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .icon-circle {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            box-shadow: 0 15px 40px rgba(79, 172, 254, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 15px 40px rgba(79, 172, 254, 0.4);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 20px 50px rgba(79, 172, 254, 0.6);
+            }
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: #64748b;
+            font-size: 17px;
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            border-color: #4facfe;
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.2);
+        }
+
+        .info-card h4 {
+            color: #4facfe;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .info-card p {
+            color: #64748b;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(79, 172, 254, 0.5);
+        }
+
+        button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-link {
+            margin-top: 25px;
+            display: inline-block;
+            color: #4facfe;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #00f2fe;
+        }
+
+        @media (max-width: 600px) {
+            .assessment-box {
+                padding: 40px 30px;
+            }
+            h2 {
+                font-size: 28px;
+            }
+            .icon-circle {
+                width: 100px;
+                height: 100px;
+                font-size: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="assessment-box">
+    <div class="icon-circle">📝</div>
+    <h2>New Assessment</h2>
+    <p>Ready to test your knowledge? Start a new assessment and showcase your skills!</p>
+
+    <div class="info-cards">
+        <div class="info-card">
+            <h4>45</h4>
+            <p>Minutes</p>
+        </div>
+        <div class="info-card">
+            <h4>50</h4>
+            <p>Questions</p>
+        </div>
+        <div class="info-card">
+            <h4>100</h4>
+            <p>Points</p>
+        </div>
+    </div>
+
+    <button onclick="startAssessment()">
+        <span>🚀 Start New Assessment</span>
+    </button>
+
+    <a href="user.html" class="back-link">← Back to Dashboard</a>
+</div>
+
+<script>
+function startAssessment() {
+    alert('Assessment started! Good luck!');
+}
+</script>
+
+</body>
+</html>
