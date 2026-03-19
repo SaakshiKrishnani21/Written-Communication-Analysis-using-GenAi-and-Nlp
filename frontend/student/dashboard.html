@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Dashboard — GenAI Assess</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="sidebar-overlay" id="sb-overlay"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">GenAI<span>Assess</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Student</div>
+      <a class="nav-item active" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="nav-item" href="new_assessment.html"><span class="nav-icon">✏️</span> New Assessment</a>
+      <a class="nav-item" href="past_performance.html"><span class="nav-icon">📊</span> My Performance</a>
+      <a class="nav-item" href="feedback.html"><span class="nav-icon">💬</span> Feedback</a>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">?</div>
+        <div><div class="user-name">Loading…</div><div class="user-role">Student</div></div>
+        <span class="logout-btn" title="Sign Out">⏻</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button class="hamburger" id="hamburger-btn"><span></span><span></span><span></span></button>
+      <h2>Dashboard</h2>
+      <div class="topbar-right">
+        <span id="date-display" style="font-size:13px;color:var(--text2)"></span>
+        <a href="new_assessment.html" class="btn btn-primary" style="padding:8px 16px;font-size:13px">+ New Assessment</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- Welcome banner -->
+      <div style="background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(167,139,250,.08));border:1px solid rgba(79,142,247,.25);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="font-size:36px">👋</div>
+        <div>
+          <h3 style="font-size:16px;margin-bottom:4px">Welcome back, <span id="welcome-name" class="gradient-text">Student</span>!</h3>
+          <p style="font-size:13px;color:var(--text2)">Pick a domain and get a random topic generated for your next essay assessment.</p>
+        </div>
+        <a href="new_assessment.html" class="btn btn-primary" style="margin-left:auto;white-space:nowrap">Start Assessment →</a>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-value" id="stat-total">—</div><div class="stat-label">Total Submissions</div></div>
+        <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-value" id="stat-avg" style="color:var(--accent)">—</div><div class="stat-label">Average Score</div></div>
+        <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-value" id="stat-high" style="color:var(--green)">—</div><div class="stat-label">Highest Score</div></div>
+        <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value" id="stat-pending" style="color:var(--amber)">—</div><div class="stat-label">Pending Review</div></div>
+      </div>
+
+      <!-- Charts -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <h3 style="font-size:15px">Score Trend</h3><span class="badge badge-blue">Last 8</span>
+          </div>
+          <div class="chart-container"><canvas id="trend-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3 style="font-size:15px;margin-bottom:16px">Score Distribution</h3>
+          <div class="chart-container"><canvas id="dist-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Recent assessments -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <h3 style="font-size:15px">Recent Assessments</h3>
+          <a href="past_performance.html" class="btn btn-secondary" style="padding:6px 14px;font-size:13px">View All →</a>
+        </div>
+        <div id="recent-list" style="display:flex;flex-direction:column;gap:12px">
+          <div style="text-align:center;padding:32px"><div class="spinner" style="margin:0 auto"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, populateSidebarUser, showToast, logout } from "../js/auth.js";
+  import { db } from "../js/firebase.js";
+  import {
+    collection, query, where, getDocs, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // Sidebar toggle
+  document.getElementById("hamburger-btn").onclick = () => {
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sb-overlay").classList.toggle("show");
+  };
+  document.getElementById("sb-overlay").onclick = () => {
+    document.getElementById("sidebar").classList.remove("open");
+    document.getElementById("sb-overlay").classList.remove("show");
+  };
+
+  async function init() {
+    try {
+      const { user } = await requireAuth("student");
+      await populateSidebarUser(user);
+
+      // Show name in welcome
+      setTimeout(() => {
+        const nm = document.querySelector(".user-name");
+        if (nm) document.getElementById("welcome-name").textContent = nm.textContent;
+      }, 600);
+
+      document.getElementById("date-display").textContent = new Date().toLocaleDateString("en-IN", {
+        weekday: "long", day: "numeric", month: "long", year: "numeric"
+      });
+
+      // Fetch assessments
+      const q = query(
+        collection(db, "assessments"),
+        where("student_id", "==", user.uid)
+      );
+      const snap = await getDocs(q);
+      const assessments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      // Stats
+      const scored = assessments.filter(a => a.ai_score !== null);
+      const scores = scored.map(a => Number(a.ai_score));
+      document.getElementById("stat-total").textContent = assessments.length;
+      document.getElementById("stat-avg").textContent = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : "—";
+      document.getElementById("stat-high").textContent = scores.length ? Math.max(...scores) : "—";
+      document.getElementById("stat-pending").textContent = assessments.filter(a => a.status === "pending").length;
+
+      renderCharts(assessments);
+      renderRecent(assessments.slice(0, 5));
+    } catch (err) { console.error(err); }
+  }
+
+  function renderRecent(list) {
+    const el = document.getElementById("recent-list");
+    if (!list.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">📄</div><h3>No assessments yet</h3><p>Submit your first assessment to see results here.</p><a href="new_assessment.html" class="btn btn-primary" style="margin-top:16px">Start Now →</a></div>`;
+      return;
+    }
+    const sm = { pending: "badge-amber", scored: "badge-blue", reviewed: "badge-green" };
+    el.innerHTML = list.map(a => {
+      const date = a.created_at?.toDate?.()?.toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" }) || "—";
+      const score = a.ai_score;
+      const badgeClass = score !== null ? (score >= 75 ? "badge-green" : score >= 50 ? "badge-amber" : "badge-red") : "";
+      return `<div class="assessment-card" onclick="location.href='past_performance.html?id=${a.id}'">
+        <div class="topic">${esc(a.topic)}</div>
+        <p style="font-size:13px;color:var(--text2);margin:6px 0 12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(a.essay?.slice(0, 110))}…</p>
+        <div class="meta">
+          <span class="badge ${sm[a.status] || 'badge-amber'}">${a.status || 'pending'}</span>
+          ${score !== null ? `<span class="badge ${badgeClass}">${score}/100</span>` : ""}
+          ${a.domain ? `<span class="badge badge-purple" style="font-size:11px">${esc(a.domain)}</span>` : ""}
+          <span style="font-size:12px;color:var(--text3);margin-left:auto">${date}</span>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  function renderCharts(assessments) {
+    const scored = assessments.filter(a => a.ai_score !== null).slice(0, 8).reverse();
+    new Chart(document.getElementById("trend-chart"), {
+      type: "line",
+      data: { labels: scored.map((_, i) => `#${i+1}`), datasets: [{ label: "Score", data: scored.map(a => Number(a.ai_score)), borderColor: "#4f8ef7", backgroundColor: "rgba(79,142,247,0.08)", fill: true, tension: 0.4, pointBackgroundColor: "#4f8ef7", pointRadius: 4, borderWidth: 2 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100, grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8" } }, x: { grid: { display: false }, ticks: { color: "#94a3b8" } } } }
+    });
+    const ranges = [0, 0, 0];
+    assessments.forEach(a => { if (a.ai_score === null) return; const s = Number(a.ai_score); if (s >= 75) ranges[2]++; else if (s >= 50) ranges[1]++; else ranges[0]++; });
+    new Chart(document.getElementById("dist-chart"), {
+      type: "doughnut",
+      data: { labels: ["Below 50", "50–74", "75+"], datasets: [{ data: ranges, backgroundColor: ["#ef4444", "#f59e0b", "#22c55e"], borderColor: "#111827", borderWidth: 3 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { color: "#94a3b8", padding: 16, font: { size: 12 } } } }, cutout: "65%" }
+    });
+  }
+
+  function esc(s) { return s ? String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") : ""; }
+
+  init();
+</script>
+</body>
+</html>

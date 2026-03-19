@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>My Performance — GenAI Assess</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="sidebar-overlay" id="sb-overlay"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">⚡</div><div class="logo-text">GenAI<span>Assess</span></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Student</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="nav-item" href="new_assessment.html"><span class="nav-icon">✏️</span> New Assessment</a>
+      <a class="nav-item active" href="past_performance.html"><span class="nav-icon">📊</span> My Performance</a>
+      <a class="nav-item" href="feedback.html"><span class="nav-icon">💬</span> Feedback</a>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">?</div>
+        <div><div class="user-name">Loading…</div><div class="user-role">Student</div></div>
+        <span class="logout-btn" title="Sign Out">⏻</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button class="hamburger" id="hamburger-btn"><span></span><span></span><span></span></button>
+      <h2>My Performance</h2>
+      <div class="topbar-right">
+        <select id="filter-status" class="input-field" style="width:150px;padding:7px 12px;font-size:13px">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="scored">Scored</option>
+          <option value="reviewed">Reviewed</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:20px">
+        <div>
+          <div id="assessment-list" style="display:flex;flex-direction:column;gap:12px">
+            <div style="text-align:center;padding:48px"><div class="spinner" style="margin:0 auto"></div></div>
+          </div>
+        </div>
+        <div>
+          <div id="detail-panel" class="card" style="position:sticky;top:80px">
+            <div class="empty-state">
+              <div class="empty-icon">👆</div>
+              <h3>Select an assessment</h3>
+              <p>Click any item to view score details, AI feedback, and reports.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Report Modal -->
+<div id="report-modal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:680px;max-height:90vh;overflow-y:auto">
+    <div class="modal-header">
+      <h3 id="modal-title">Report</h3>
+      <span class="modal-close" id="modal-close-btn">×</span>
+    </div>
+    <div class="tabs" style="margin-bottom:20px">
+      <button class="tab-btn active" id="tab-ai-btn">AI Report</button>
+      <button class="tab-btn" id="tab-admin-btn">Admin Review</button>
+      <button class="tab-btn" id="tab-compare-btn">Comparison</button>
+    </div>
+    <div id="tab-ai" class="tab-content active"><div id="modal-ai" class="essay-display"></div></div>
+    <div id="tab-admin" class="tab-content"><div id="modal-admin" class="essay-display"></div></div>
+    <div id="tab-compare" class="tab-content"><div id="modal-compare" class="essay-display"></div></div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, populateSidebarUser, showToast } from "../js/auth.js";
+  import { db } from "../js/firebase.js";
+  import {
+    collection, query, where, getDocs, doc, getDoc, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  let allAssessments = [], currentUser;
+
+  // Sidebar
+  document.getElementById("hamburger-btn").onclick = () => {
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sb-overlay").classList.toggle("show");
+  };
+  document.getElementById("sb-overlay").onclick = () => {
+    document.getElementById("sidebar").classList.remove("open");
+    document.getElementById("sb-overlay").classList.remove("show");
+  };
+
+  // Modal close
+  document.getElementById("modal-close-btn").onclick = () =>
+    document.getElementById("report-modal").classList.add("hidden");
+  document.getElementById("report-modal").onclick = (e) => {
+    if (e.target === document.getElementById("report-modal"))
+      document.getElementById("report-modal").classList.add("hidden");
+  };
+
+  // Tab switching
+  ["ai","admin","compare"].forEach(tab => {
+    document.getElementById(`tab-${tab}-btn`).onclick = () => {
+      ["ai","admin","compare"].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.toggle("active", t === tab);
+        document.getElementById(`tab-${t}-btn`).classList.toggle("active", t === tab);
+      });
+    };
+  });
+
+  // Filter
+  document.getElementById("filter-status").onchange = (e) => {
+    const filtered = e.target.value ? allAssessments.filter(a => a.status === e.target.value) : allAssessments;
+    renderList(filtered);
+  };
+
+  async function init() {
+    const { user } = await requireAuth("student");
+    currentUser = user;
+    await populateSidebarUser(user);
+
+    const q = query(
+  collection(db, "assessments"),
+  where("student_id", "==", user.uid)
+);
+    const snap = await getDocs(q);
+    allAssessments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderList(allAssessments);
+
+    // Auto-open from URL
+    const params = new URLSearchParams(location.search);
+    if (params.get("id")) openDetail(params.get("id"));
+  }
+
+  function renderList(list) {
+    const el = document.getElementById("assessment-list");
+    if (!list.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">📄</div><h3>No assessments found</h3><p>Try a different filter or submit a new assessment.</p><a href="new_assessment.html" class="btn btn-primary" style="margin-top:16px">Start Assessment</a></div>`;
+      return;
+    }
+    const sm = { pending:"badge-amber", scored:"badge-blue", reviewed:"badge-green" };
+    el.innerHTML = list.map(a => {
+      const date = a.created_at?.toDate?.()?.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}) || "—";
+      const score = a.ai_score;
+      const bc = score !== null ? (score >= 75 ? "badge-green" : score >= 50 ? "badge-amber" : "badge-red") : "";
+      return `<div class="assessment-card" onclick="openDetail('${a.id}')">
+        <div class="topic">${esc(a.topic)}</div>
+        <p style="font-size:13px;color:var(--text2);margin:6px 0 12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(a.essay?.slice(0,110))}…</p>
+        <div class="meta">
+          <span class="badge ${sm[a.status]||'badge-amber'}">${a.status||'pending'}</span>
+          ${score!==null?`<span class="badge ${bc}">${score}/100</span>`:''}
+          ${a.domain?`<span class="badge badge-purple" style="font-size:11px">${esc(a.domain)}</span>`:''}
+          <span style="font-size:12px;color:var(--text3);margin-left:auto">${date}</span>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  window.openDetail = async function(id) {
+    const panel = document.getElementById("detail-panel");
+    panel.innerHTML = `<div style="text-align:center;padding:32px"><div class="spinner" style="margin:0 auto"></div></div>`;
+
+    try {
+      // Get assessment
+      const aSnap = await getDoc(doc(db,"assessments",id));
+      if (!aSnap.exists()) { panel.innerHTML = `<div style="color:var(--red);padding:20px">Assessment not found.</div>`; return; }
+      const a = { id: aSnap.id, ...aSnap.data() };
+
+      // Get report
+      const rQ = query(collection(db,"reports"), where("assessment_id","==",id));
+      const rSnap = await getDocs(rQ);
+      const report = rSnap.empty ? null : rSnap.docs[0].data();
+
+      // Get admin review
+      const revQ = query(collection(db,"admin_reviews"), where("assessment_id","==",id));
+      const revSnap = await getDocs(revQ);
+      const review = revSnap.empty ? null : revSnap.docs[0].data();
+
+      const score = a.ai_score;
+      const adminScore = review?.admin_score ?? null;
+      const breakdown = a.ai_breakdown || {};
+      const date = a.created_at?.toDate?.()?.toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"}) || "—";
+      const labels = {content:"Content",structure:"Structure",language:"Language",grammar:"Grammar",critical_thinking:"Critical"};
+
+      panel.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Topic</div>
+            <div style="font-weight:600;font-size:14px;line-height:1.4">${esc(a.topic)}</div>
+            ${a.domain?`<span class="badge badge-purple" style="font-size:11px;margin-top:6px;display:inline-flex">${esc(a.domain)}</span>`:''}
+          </div>
+          <div style="font-size:12px;color:var(--text3)">${date}</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px">AI Score</div>
+              <div style="font-family:var(--font-head);font-size:28px;font-weight:700;color:${score!==null?(score>=75?'var(--green)':score>=50?'var(--amber)':'var(--red)'):'var(--text3)'}">${score!==null?score:"—"}</div>
+              ${score!==null?`<div style="font-size:11px;color:var(--text2)">${score>=85?'Excellent':score>=70?'Good':score>=50?'Average':'Needs Work'}</div>`:'<div style="font-size:11px;color:var(--text3)">Pending</div>'}
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Admin Score</div>
+              <div style="font-family:var(--font-head);font-size:28px;font-weight:700;color:${adminScore!==null?(adminScore>=75?'var(--green)':adminScore>=50?'var(--amber)':'var(--red)'):'var(--text3)'}">${adminScore!==null?adminScore:"—"}</div>
+              ${adminScore!==null?`<div style="font-size:11px;color:var(--text2)">${adminScore>=85?'Excellent':adminScore>=70?'Good':adminScore>=50?'Average':'Needs Work'}</div>`:'<div style="font-size:11px;color:var(--text3)">Pending</div>'}
+            </div>
+          </div>
+
+          ${Object.keys(breakdown).length ? `<div>${Object.entries(breakdown).map(([k,v])=>{
+            const col=v>=15?'var(--green)':v>=10?'var(--amber)':'var(--red)';
+            return `<div class="breakdown-row"><div class="label" style="width:90px">${labels[k]||k}</div><div class="bar-wrap"><div class="bar-fill" style="width:${(v/20)*100}%;background:${col}"></div></div><div class="score-val" style="color:${col}">${v}/20</div></div>`;
+          }).join("")}</div>` : ''}
+
+          ${a.ai_feedback?`<div class="callout callout-blue"><strong style="color:var(--text)">AI Feedback:</strong> ${esc(a.ai_feedback)}</div>`:''}
+          ${review?.admin_feedback?`<div class="callout callout-green"><strong style="color:var(--text)">Admin Feedback:</strong> ${esc(review.admin_feedback)}</div>`:''}
+
+          ${report
+            ? `<button class="btn btn-primary btn-full" onclick="openReport('${id}','${esc(a.topic)}')">📄 View Full Report</button>`
+            : `<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px">Full report not yet available.</div>`
+          }
+          <a href="new_assessment.html" class="btn btn-secondary btn-full">+ New Assessment</a>
+        </div>`;
+    } catch(err) {
+      panel.innerHTML = `<div style="color:var(--red);padding:20px;font-size:13px">Failed to load: ${err.message}</div>`;
+    }
+  };
+
+  window.openReport = async function(id, title) {
+    document.getElementById("modal-title").textContent = title || "Assessment Report";
+    document.getElementById("modal-ai").textContent = "Loading…";
+    document.getElementById("modal-admin").textContent = "Loading…";
+    document.getElementById("modal-compare").textContent = "Loading…";
+    document.getElementById("report-modal").classList.remove("hidden");
+
+    try {
+      const rQ = query(collection(db,"reports"), where("assessment_id","==",id));
+      const rSnap = await getDocs(rQ);
+      const report = rSnap.empty ? null : rSnap.docs[0].data();
+      document.getElementById("modal-ai").textContent = report?.ai_report || "AI report not yet generated.";
+      document.getElementById("modal-admin").textContent = report?.admin_report || "Not yet reviewed by admin.";
+      document.getElementById("modal-compare").textContent = report?.comparison_report || "Comparison report not yet generated.";
+    } catch(err) {
+      document.getElementById("modal-ai").textContent = "Failed to load report: " + err.message;
+    }
+  };
+
+  function esc(s) { return s ? String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") : ""; }
+
+  init();
+</script>
+</body>
+</html>

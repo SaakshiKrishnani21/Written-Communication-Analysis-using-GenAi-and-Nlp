@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Feedback — GenAI Assess</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="sidebar-overlay" id="sb-overlay"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">⚡</div><div class="logo-text">GenAI<span>Assess</span></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Student</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="nav-item" href="new_assessment.html"><span class="nav-icon">✏️</span> New Assessment</a>
+      <a class="nav-item" href="past_performance.html"><span class="nav-icon">📊</span> My Performance</a>
+      <a class="nav-item active" href="feedback.html"><span class="nav-icon">💬</span> Feedback</a>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">?</div>
+        <div><div class="user-name">Loading…</div><div class="user-role">Student</div></div>
+        <span class="logout-btn" title="Sign Out">⏻</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button class="hamburger" id="hamburger-btn"><span></span><span></span><span></span></button>
+      <h2>Feedback</h2>
+    </div>
+
+    <div class="page-content" style="max-width:740px">
+      <div style="margin-bottom:28px">
+        <h3 style="font-size:22px;margin-bottom:6px">Share Your <span class="gradient-text">Feedback</span></h3>
+        <p style="color:var(--text2);font-size:14px">Help us improve the GenAI Assessment platform. Your feedback is reviewed by our team.</p>
+      </div>
+
+      <div id="feedback-form">
+        <!-- Overall rating -->
+        <div class="card" style="margin-bottom:20px">
+          <h3 style="font-size:15px;margin-bottom:16px">Overall Experience</h3>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+            <div class="rating-stars" id="overall-stars">
+              <span class="star" data-val="1">★</span><span class="star" data-val="2">★</span>
+              <span class="star" data-val="3">★</span><span class="star" data-val="4">★</span>
+              <span class="star" data-val="5">★</span>
+            </div>
+            <span id="overall-label" style="font-size:14px;color:var(--text2)">Click to rate</span>
+          </div>
+          <div class="input-group">
+            <label>What did you like most?</label>
+            <textarea id="overall-comment" class="input-field" style="min-height:90px" placeholder="The AI scoring was surprisingly accurate…"></textarea>
+          </div>
+        </div>
+
+        <!-- Dimension ratings -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+          <div class="feedback-item">
+            <div style="font-weight:500;font-size:14px">AI Scoring Accuracy</div>
+            <p style="font-size:12px;color:var(--text2);margin:4px 0 8px">How accurate did the AI scoring feel?</p>
+            <div class="rating-stars" id="ai-stars">
+              <span class="star" data-val="1">★</span><span class="star" data-val="2">★</span>
+              <span class="star" data-val="3">★</span><span class="star" data-val="4">★</span>
+              <span class="star" data-val="5">★</span>
+            </div>
+          </div>
+          <div class="feedback-item">
+            <div style="font-weight:500;font-size:14px">User Interface</div>
+            <p style="font-size:12px;color:var(--text2);margin:4px 0 8px">How easy was the platform to use?</p>
+            <div class="rating-stars" id="ui-stars">
+              <span class="star" data-val="1">★</span><span class="star" data-val="2">★</span>
+              <span class="star" data-val="3">★</span><span class="star" data-val="4">★</span>
+              <span class="star" data-val="5">★</span>
+            </div>
+          </div>
+          <div class="feedback-item">
+            <div style="font-weight:500;font-size:14px">Report Quality</div>
+            <p style="font-size:12px;color:var(--text2);margin:4px 0 8px">Were the reports helpful and detailed?</p>
+            <div class="rating-stars" id="report-stars">
+              <span class="star" data-val="1">★</span><span class="star" data-val="2">★</span>
+              <span class="star" data-val="3">★</span><span class="star" data-val="4">★</span>
+              <span class="star" data-val="5">★</span>
+            </div>
+          </div>
+          <div class="feedback-item">
+            <div style="font-weight:500;font-size:14px">Random Topic Feature</div>
+            <p style="font-size:12px;color:var(--text2);margin:4px 0 8px">How useful is domain-based topic generation?</p>
+            <div class="rating-stars" id="topic-stars">
+              <span class="star" data-val="1">★</span><span class="star" data-val="2">★</span>
+              <span class="star" data-val="3">★</span><span class="star" data-val="4">★</span>
+              <span class="star" data-val="5">★</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggestions -->
+        <div class="card" style="margin-bottom:20px">
+          <h3 style="font-size:15px;margin-bottom:16px">Suggestions & Issues</h3>
+          <div class="input-group" style="margin-bottom:14px">
+            <label>Type of feedback</label>
+            <select id="feedback-type" class="input-field">
+              <option value="suggestion">Suggestion</option>
+              <option value="bug">Bug Report</option>
+              <option value="feature">Feature Request</option>
+              <option value="general">General Comment</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Detailed feedback</label>
+            <textarea id="suggestion-text" class="input-field" style="min-height:120px" placeholder="Describe your suggestion, issue, or feature request in detail…"></textarea>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-full btn-lg" id="submit-fb-btn">
+          <span id="fb-btn-text">Submit Feedback</span>
+          <span id="fb-spinner" class="spinner hidden"></span>
+        </button>
+      </div>
+
+      <!-- Thank you screen -->
+      <div id="thank-you" class="hidden" style="text-align:center;padding:60px 24px">
+        <div style="font-size:64px;margin-bottom:20px">🙏</div>
+        <h3 style="font-size:24px;margin-bottom:10px">Thank you!</h3>
+        <p style="color:var(--text2);max-width:400px;margin:0 auto 28px">Your feedback has been submitted and will be reviewed by our team. It genuinely helps us improve.</p>
+        <a href="dashboard.html" class="btn btn-primary btn-lg">Back to Dashboard</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, populateSidebarUser, showToast } from "../js/auth.js";
+  import { db } from "../js/firebase.js";
+  import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  let ratings = { overall: 0, ai: 0, ui: 0, report: 0, topic: 0 };
+  const ratingLabels = ["", "Poor", "Fair", "Good", "Very Good", "Excellent"];
+  let currentUser;
+
+  document.getElementById("hamburger-btn").onclick = () => {
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sb-overlay").classList.toggle("show");
+  };
+  document.getElementById("sb-overlay").onclick = () => {
+    document.getElementById("sidebar").classList.remove("open");
+    document.getElementById("sb-overlay").classList.remove("show");
+  };
+
+  // Wire star ratings
+  ["overall","ai","ui","report","topic"].forEach(key => {
+    document.querySelectorAll(`#${key}-stars .star`).forEach(star => {
+      star.onclick = () => {
+        const val = parseInt(star.dataset.val);
+        ratings[key] = val;
+        document.querySelectorAll(`#${key}-stars .star`).forEach(s =>
+          s.classList.toggle("active", parseInt(s.dataset.val) <= val)
+        );
+        if (key === "overall") {
+          document.getElementById("overall-label").textContent = `${ratingLabels[val]} (${val}/5)`;
+        }
+      };
+      // Hover effect
+      star.onmouseenter = () => {
+        const val = parseInt(star.dataset.val);
+        document.querySelectorAll(`#${key}-stars .star`).forEach(s =>
+          s.style.opacity = parseInt(s.dataset.val) <= val ? "0.8" : "0.3"
+        );
+      };
+      star.onmouseleave = () => {
+        document.querySelectorAll(`#${key}-stars .star`).forEach(s => s.style.opacity = "");
+      };
+    });
+  });
+
+  document.getElementById("submit-fb-btn").onclick = async () => {
+    if (ratings.overall === 0) { showToast("Please rate your overall experience first.", "error"); return; }
+    const btn = document.getElementById("submit-fb-btn");
+    btn.disabled = true;
+    document.getElementById("fb-btn-text").textContent = "Submitting…";
+    document.getElementById("fb-spinner").classList.remove("hidden");
+    try {
+      await addDoc(collection(db, "feedback"), {
+        student_id: currentUser.uid,
+        ratings,
+        overall_comment: document.getElementById("overall-comment").value.trim(),
+        feedback_type: document.getElementById("feedback-type").value,
+        suggestion: document.getElementById("suggestion-text").value.trim(),
+        created_at: serverTimestamp()
+      });
+      document.getElementById("feedback-form").classList.add("hidden");
+      document.getElementById("thank-you").classList.remove("hidden");
+    } catch (err) {
+      showToast("Failed to submit: " + err.message, "error");
+      btn.disabled = false;
+      document.getElementById("fb-btn-text").textContent = "Submit Feedback";
+      document.getElementById("fb-spinner").classList.add("hidden");
+    }
+  };
+
+  async function init() {
+    const { user } = await requireAuth("student");
+    currentUser = user;
+    await populateSidebarUser(user);
+  }
+  init();
+</script>
+</body>
+</html>

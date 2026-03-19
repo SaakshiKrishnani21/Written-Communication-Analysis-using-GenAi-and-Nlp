@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>History — GenAI Assess</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="sidebar-overlay" id="sb-overlay"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">⚡</div><div class="logo-text">GenAI<span>Assess</span></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Admin</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="nav-item" href="check_assessment.html"><span class="nav-icon">📋</span> Check Assessments</a>
+      <a class="nav-item active" href="history.html"><span class="nav-icon">📜</span> History</a>
+      <a class="nav-item" href="help_center.html"><span class="nav-icon">❓</span> Help Center</a>
+      <a class="nav-item" href="contact.html"><span class="nav-icon">📩</span> Contact</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">?</div>
+        <div><div class="user-name">Loading…</div><div class="user-role">Admin</div></div>
+        <span class="logout-btn" title="Sign Out">⏻</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button class="hamburger" id="hamburger-btn"><span></span><span></span><span></span></button>
+      <h2>Assessment History</h2>
+      <div class="topbar-right" style="display:flex;gap:8px">
+        <input type="text" id="search-input" class="input-field" placeholder="Search student / topic…" style="width:220px;padding:7px 12px;font-size:13px"/>
+        <select id="filter-status" class="input-field" style="width:140px;padding:7px 12px;font-size:13px">
+          <option value="">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="scored">Scored</option>
+          <option value="reviewed">Reviewed</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Student</th><th>Topic</th><th>Domain</th><th>AI Score</th><th>Admin Score</th><th>Status</th><th>Date</th><th>Action</th></tr>
+            </thead>
+            <tbody id="history-table">
+              <tr><td colspan="8" style="text-align:center;padding:48px"><div class="spinner" style="margin:0 auto"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0 0;border-top:1px solid var(--border);margin-top:8px">
+          <span id="page-info" style="font-size:13px;color:var(--text2)"></span>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-secondary" id="prev-btn" style="padding:6px 14px;font-size:13px">← Prev</button>
+            <button class="btn btn-secondary" id="next-btn" style="padding:6px 14px;font-size:13px">Next →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div id="detail-modal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:700px;max-height:90vh;overflow-y:auto">
+    <div class="modal-header">
+      <h3 id="modal-title">Assessment Detail</h3>
+      <span class="modal-close" id="modal-close">×</span>
+    </div>
+    <div id="modal-body" style="display:flex;flex-direction:column;gap:16px"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, populateSidebarUser } from "../js/auth.js";
+  import { db } from "../js/firebase.js";
+  import {
+    collection, getDocs, query, where, orderBy, doc, getDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  let allData = [], filtered = [], page = 0;
+  const PER_PAGE = 15;
+
+  document.getElementById("hamburger-btn").onclick = () => {
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sb-overlay").classList.toggle("show");
+  };
+  document.getElementById("sb-overlay").onclick = () => {
+    document.getElementById("sidebar").classList.remove("open");
+    document.getElementById("sb-overlay").classList.remove("show");
+  };
+  document.getElementById("modal-close").onclick = () =>
+    document.getElementById("detail-modal").classList.add("hidden");
+  document.getElementById("detail-modal").onclick = (e) => {
+    if (e.target === document.getElementById("detail-modal"))
+      document.getElementById("detail-modal").classList.add("hidden");
+  };
+
+  document.getElementById("search-input").oninput = applyFilters;
+  document.getElementById("filter-status").onchange = applyFilters;
+  document.getElementById("prev-btn").onclick = () => { if(page>0){page--;renderTable();} };
+  document.getElementById("next-btn").onclick = () => { if((page+1)*PER_PAGE<filtered.length){page++;renderTable();} };
+
+  function applyFilters() {
+    const q = document.getElementById("search-input").value.toLowerCase();
+    const s = document.getElementById("filter-status").value;
+    filtered = allData.filter(a =>
+      (!q || (a.student_name||"").toLowerCase().includes(q) || (a.topic||"").toLowerCase().includes(q)) &&
+      (!s || a.status === s)
+    );
+    page = 0;
+    renderTable();
+  }
+
+  async function init() {
+    const { user } = await requireAuth("admin");
+    await populateSidebarUser(user);
+
+    const snap = await getDocs(collection(db, "assessments"));
+    allData = await Promise.all(snap.docs.map(async d => {
+      const a = { id: d.id, ...d.data() };
+      try {
+        const uSnap = await getDoc(doc(db,"users",a.student_id));
+        const sSnap = await getDoc(doc(db,"students",a.student_id));
+        a.student_name = uSnap.exists() ? uSnap.data().name : "Unknown";
+        a.student_roll = sSnap.exists() ? sSnap.data().roll_no : "—";
+      } catch { a.student_name = "Unknown"; a.student_roll = "—"; }
+
+      // Fetch admin score
+      try {
+        const revQ = query(collection(db,"admin_reviews"), where("assessment_id","==",a.id));
+        const revSnap = await getDocs(revQ);
+        a.admin_score = revSnap.empty ? null : revSnap.docs[0].data().admin_score;
+      } catch { a.admin_score = null; }
+
+      return a;
+    }));
+
+    filtered = allData;
+    renderTable();
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById("history-table");
+    const start = page * PER_PAGE;
+    const slice = filtered.slice(start, start + PER_PAGE);
+
+    document.getElementById("page-info").textContent =
+      filtered.length ? `Showing ${start+1}–${Math.min(start+PER_PAGE,filtered.length)} of ${filtered.length}` : "No records";
+    document.getElementById("prev-btn").disabled = page === 0;
+    document.getElementById("next-btn").disabled = start + PER_PAGE >= filtered.length;
+
+    if (!slice.length) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text2);padding:32px">No records found.</td></tr>`;
+      return;
+    }
+
+    const sm = { pending:"badge-amber", scored:"badge-blue", reviewed:"badge-green" };
+    tbody.innerHTML = slice.map(a => {
+      const date = a.created_at?.toDate?.()?.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}) || "—";
+      const aiScore = a.ai_score!==null ? `<span class="badge ${a.ai_score>=75?"badge-green":a.ai_score>=50?"badge-amber":"badge-red"}">${a.ai_score}</span>` : `<span style="color:var(--text3)">—</span>`;
+      const adminScore = a.admin_score!==null ? `<span class="badge ${a.admin_score>=75?"badge-green":a.admin_score>=50?"badge-amber":"badge-red"}">${a.admin_score}</span>` : `<span style="color:var(--text3)">—</span>`;
+      return `<tr>
+        <td><span style="font-weight:500">${esc(a.student_name)}</span><br><span style="font-size:11px;color:var(--text2)">${esc(a.student_roll)}</span></td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.topic)}</td>
+        <td>${a.domain?`<span class="badge badge-purple" style="font-size:11px">${esc(a.domain)}</span>`:"—"}</td>
+        <td>${aiScore}</td>
+        <td>${adminScore}</td>
+        <td><span class="badge ${sm[a.status]||'badge-amber'}">${a.status||"pending"}</span></td>
+        <td style="font-size:13px;color:var(--text2)">${date}</td>
+        <td>
+          <button class="btn btn-secondary" style="padding:5px 12px;font-size:12px;margin-right:4px" onclick="openDetail('${a.id}')">View</button>
+          ${a.status!=="reviewed"?`<a href="check_assessment.html?id=${a.id}" class="btn btn-primary" style="padding:5px 12px;font-size:12px">Review</a>`:""}
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  window.openDetail = async function(id) {
+    document.getElementById("detail-modal").classList.remove("hidden");
+    document.getElementById("modal-body").innerHTML = `<div style="text-align:center;padding:32px"><div class="spinner" style="margin:0 auto"></div></div>`;
+
+    try {
+      const aSnap = await getDoc(doc(db,"assessments",id));
+      const a = { id: aSnap.id, ...aSnap.data() };
+
+      const uSnap = await getDoc(doc(db,"users",a.student_id));
+      a.student_name = uSnap.exists() ? uSnap.data().name : "Unknown";
+      a.student_email = uSnap.exists() ? uSnap.data().email : "—";
+
+      const revQ = query(collection(db,"admin_reviews"), where("assessment_id","==",id));
+      const revSnap = await getDocs(revQ);
+      const review = revSnap.empty ? null : revSnap.docs[0].data();
+
+      document.getElementById("modal-title").textContent = a.topic;
+      document.getElementById("modal-body").innerHTML = `
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="badge badge-blue">${esc(a.student_name)}</span>
+          ${a.domain?`<span class="badge badge-purple">${esc(a.domain)}</span>`:""}
+          <span class="badge ${a.status==="reviewed"?"badge-green":a.status==="scored"?"badge-blue":"badge-amber"}">${a.status||"pending"}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">AI Score</div>
+            <div style="font-family:var(--font-head);font-size:32px;font-weight:800;color:${a.ai_score!=null?(a.ai_score>=75?'var(--green)':a.ai_score>=50?'var(--amber)':'var(--red)'):'var(--text3)'}">${a.ai_score??'—'}</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Admin Score</div>
+            <div style="font-family:var(--font-head);font-size:32px;font-weight:800;color:${review?.admin_score!=null?(review.admin_score>=75?'var(--green)':review.admin_score>=50?'var(--amber)':'var(--red)'):'var(--text3)'}">${review?.admin_score??'—'}</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Essay</div>
+          <div class="essay-display">${esc(a.essay)}</div>
+        </div>
+        ${a.ai_feedback?`<div class="callout callout-blue"><strong style="color:var(--text)">AI Feedback:</strong> ${esc(a.ai_feedback)}</div>`:""}
+        ${review?.admin_feedback?`<div class="callout callout-green"><strong style="color:var(--text)">Admin Feedback:</strong> ${esc(review.admin_feedback)}</div>`:""}
+        ${a.status!=="reviewed"?`<a href="check_assessment.html?id=${id}" class="btn btn-primary btn-full">Review this Assessment →</a>`:""}
+      `;
+    } catch(err) {
+      document.getElementById("modal-body").innerHTML = `<div style="color:var(--red)">Failed to load: ${err.message}</div>`;
+    }
+  };
+
+  function esc(s) { return s ? String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") : ""; }
+  init();
+</script>
+</body>
+</html>

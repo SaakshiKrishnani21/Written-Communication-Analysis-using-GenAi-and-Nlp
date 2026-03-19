@@ -1,0 +1,21 @@
+# GenAI Assessment System — Backend Dependencies  v2
+# Install: pip install -r requirements.txt --break-system-packages
+
+# ── Web framework ──────────────────────────────────────────────
+flask==3.0.3
+flask-cors==4.0.1
+
+# ── Firebase Admin SDK ─────────────────────────────────────────
+firebase-admin==6.5.0
+
+# ── Google AI / Gemini ─────────────────────────────────────────
+google-generativeai==0.7.2
+
+# ── NLP ────────────────────────────────────────────────────────
+nltk==3.8.1
+
+# ── Environment / config ──────────────────────────────────────
+python-dotenv==1.0.1
+
+# ── Production server ─────────────────────────────────────────
+gunicorn==22.0.0

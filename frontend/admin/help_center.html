@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Help Center — GenAI Assess</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="sidebar-overlay" id="sb-overlay"></div>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">⚡</div><div class="logo-text">GenAI<span>Assess</span></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Admin</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="nav-item" href="check_assessment.html"><span class="nav-icon">📋</span> Check Assessments</a>
+      <a class="nav-item" href="history.html"><span class="nav-icon">📜</span> History</a>
+      <a class="nav-item active" href="help_center.html"><span class="nav-icon">❓</span> Help Center</a>
+      <a class="nav-item" href="contact.html"><span class="nav-icon">📩</span> Contact</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">?</div>
+        <div><div class="user-name">Loading…</div><div class="user-role">Admin</div></div>
+        <span class="logout-btn" title="Sign Out">⏻</span>
+      </div>
+    </div>
+  </aside>
+  <div class="main-content">
+    <div class="topbar">
+      <button class="hamburger" id="hamburger-btn"><span></span><span></span><span></span></button>
+      <h2>Help Center</h2>
+    </div>
+    <div class="page-content" style="max-width:760px">
+      <div style="margin-bottom:24px">
+        <h3 style="font-size:22px;margin-bottom:6px">How can we <span class="gradient-text">help you?</span></h3>
+        <p style="color:var(--text2)">Browse guides and FAQs for administrators.</p>
+      </div>
+      <div style="position:relative;margin-bottom:28px">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3)">🔍</span>
+        <input type="text" id="search-faq" class="input-field" style="padding-left:42px" placeholder="Search help articles…"/>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px">
+        <div class="card" style="text-align:center;cursor:pointer" onclick="document.getElementById('sec-start').scrollIntoView({behavior:'smooth'})">
+          <div style="font-size:28px;margin-bottom:8px">🚀</div>
+          <div style="font-size:14px;font-weight:600">Getting Started</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:4px">Setup and onboarding</div>
+        </div>
+        <div class="card" style="text-align:center;cursor:pointer" onclick="document.getElementById('sec-review').scrollIntoView({behavior:'smooth'})">
+          <div style="font-size:28px;margin-bottom:8px">📋</div>
+          <div style="font-size:14px;font-weight:600">Reviewing Essays</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:4px">How to review and score</div>
+        </div>
+        <div class="card" style="text-align:center;cursor:pointer" onclick="document.getElementById('sec-ai').scrollIntoView({behavior:'smooth'})">
+          <div style="font-size:28px;margin-bottom:8px">🤖</div>
+          <div style="font-size:14px;font-weight:600">AI System</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:4px">How the AI scoring works</div>
+        </div>
+      </div>
+
+      <div id="sec-start" style="margin-bottom:28px">
+        <h3 style="font-size:16px;margin-bottom:14px">🚀 Getting Started</h3>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="faq-item"><div class="faq-question">How do I access the admin panel?<span class="faq-chevron">▼</span></div><div class="faq-answer">Go to Firebase Console → Firestore → users collection → find your document → change the role field from "student" to "admin". Log out and back in — you'll be redirected to the admin dashboard automatically.</div></div>
+          <div class="faq-item"><div class="faq-question">How do students register?<span class="faq-chevron">▼</span></div><div class="faq-answer">Students register themselves on the login page using email/password or Google sign-in. They're automatically added to Firestore with role "student". They complete their profile (roll number, branch) in the Settings page.</div></div>
+          <div class="faq-item"><div class="faq-question">How do I set up email notifications?<span class="faq-chevron">▼</span></div><div class="faq-answer">Edit the backend/.env file: set SMTP_USER to your Gmail address and SMTP_PASS to your Gmail App Password. To get an App Password: Google Account → Security → Enable 2FA → App Passwords → Generate. Restart the backend after saving.</div></div>
+        </div>
+      </div>
+
+      <div id="sec-review" style="margin-bottom:28px">
+        <h3 style="font-size:16px;margin-bottom:14px">📋 Reviewing Essays</h3>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="faq-item"><div class="faq-question">What is the review workflow?<span class="faq-chevron">▼</span></div><div class="faq-answer">1. Student submits essay → 2. AI scores automatically (Gemini + NLP) → 3. Appears in your Check Assessments queue → 4. You review and submit your score + feedback → 5. Comparison report generated → 6. Student sees both scores in their dashboard.</div></div>
+          <div class="faq-item"><div class="faq-question">Can I edit a review after submitting?<span class="faq-chevron">▼</span></div><div class="faq-answer">Currently reviews cannot be edited through the UI. If needed, directly edit the admin_reviews document in Firebase Console. A future update will add edit functionality.</div></div>
+          <div class="faq-item"><div class="faq-question">What happens after I submit a review?<span class="faq-chevron">▼</span></div><div class="faq-answer">The system saves your score and feedback, updates the assessment status to "reviewed", calls the backend to generate an admin report and comparison report via Gemini AI, then updates the reports collection. Students can immediately see both scores and the comparison.</div></div>
+        </div>
+      </div>
+
+      <div id="sec-ai" style="margin-bottom:28px">
+        <h3 style="font-size:16px;margin-bottom:14px">🤖 AI Scoring System</h3>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="faq-item"><div class="faq-question">How does the AI score essays?<span class="faq-chevron">▼</span></div><div class="faq-answer">Two layers: (1) NLTK extracts structural features — word count, vocabulary richness (TTR), sentence variety, paragraph count, transition word usage. (2) Google Gemini 1.5 Flash scores 5 dimensions: Content & Relevance (0-20), Structure (0-20), Language (0-20), Grammar (0-20), Critical Thinking (0-20). Total = 100.</div></div>
+          <div class="faq-item"><div class="faq-question">What if the AI backend is offline?<span class="faq-chevron">▼</span></div><div class="faq-answer">Essays are saved to Firestore with status "pending" and ai_score: null. You can review them manually through Check Assessments. When the backend comes back online, re-trigger scoring by POSTing to /score with the assessment_id, topic, and essay.</div></div>
+          <div class="faq-item"><div class="faq-question">How is the random topic generated?<span class="faq-chevron">▼</span></div><div class="faq-answer">Topics are generated client-side from a bank of 8 domains (CS, Electronics, Mechanical, Civil, Biotech, IT, Environment, General), each with 10 curated essay topics. Math.random() selects one when the student picks a domain. Students can regenerate before accepting.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { requireAuth, populateSidebarUser } from "../js/auth.js";
+
+  document.getElementById("hamburger-btn").onclick = () => {
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sb-overlay").classList.toggle("show");
+  };
+  document.getElementById("sb-overlay").onclick = () => {
+    document.getElementById("sidebar").classList.remove("open");
+    document.getElementById("sb-overlay").classList.remove("show");
+  };
+
+  // FAQ accordion
+  document.querySelectorAll(".faq-question").forEach(q => {
+    q.onclick = () => q.closest(".faq-item").classList.toggle("open");
+  });
+
+  // Search filter
+  document.getElementById("search-faq").oninput = function() {
+    const term = this.value.toLowerCase();
+    document.querySelectorAll(".faq-item").forEach(item => {
+      item.style.display = item.textContent.toLowerCase().includes(term) ? "" : "none";
+    });
+  };
+
+  async function init() {
+    const { user } = await requireAuth("admin");
+    await populateSidebarUser(user);
+  }
+  init();
+</script>
+</body>
+</html>

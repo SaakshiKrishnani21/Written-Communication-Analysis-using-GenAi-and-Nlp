@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Check Assessments — GenAI Assess</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="sidebar-overlay" id="sb-overlay"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">⚡</div><div class="logo-text">GenAI<span>Assess</span></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Admin</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="nav-item active" href="check_assessment.html">
+        <span class="nav-icon">📋</span> Check Assessments
+        <span class="nav-badge" id="pending-badge">…</span>
+      </a>
+      <a class="nav-item" href="history.html"><span class="nav-icon">📜</span> History</a>
+      <a class="nav-item" href="help_center.html"><span class="nav-icon">❓</span> Help Center</a>
+      <a class="nav-item" href="contact.html"><span class="nav-icon">📩</span> Contact</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">?</div>
+        <div><div class="user-name">Loading…</div><div class="user-role">Admin</div></div>
+        <span class="logout-btn" title="Sign Out">⏻</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button class="hamburger" id="hamburger-btn"><span></span><span></span><span></span></button>
+      <h2>Check Assessments</h2>
+      <div class="topbar-right">
+        <select id="filter-status" ...>
+  <option value="">All</option>
+  <option value="pending">Pending</option>
+  <option value="scored">AI Scored</option>
+  <option value="reviewed">Reviewed</option>
+</select>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:20px">
+        <!-- List -->
+        <div>
+          <div id="assessment-list" style="display:flex;flex-direction:column;gap:10px">
+            <div style="text-align:center;padding:48px"><div class="spinner" style="margin:0 auto"></div></div>
+          </div>
+        </div>
+        <!-- Review panel -->
+        <div>
+          <div id="review-panel" class="card" style="position:sticky;top:80px">
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <h3>Select an assessment</h3>
+              <p>Choose a submission from the list to review and score it.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, populateSidebarUser, showToast } from "../js/auth.js";
+  import { db } from "../js/firebase.js";
+  import {
+    collection, query, where, getDocs, doc, getDoc,
+    addDoc, updateDoc, orderBy, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const API = "http://localhost:5000";
+  let currentUser, allAssessments = [];
+
+  document.getElementById("hamburger-btn").onclick = () => {
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sb-overlay").classList.toggle("show");
+  };
+  document.getElementById("sb-overlay").onclick = () => {
+    document.getElementById("sidebar").classList.remove("open");
+    document.getElementById("sb-overlay").classList.remove("show");
+  };
+
+  document.getElementById("filter-status").onchange = (e) => loadList(e.target.value);
+
+  async function init() {
+    const { user } = await requireAuth("admin");
+    currentUser = user;
+    await populateSidebarUser(user);
+    await loadList("");
+    const params = new URLSearchParams(location.search);
+    if (params.get("id")) openReview(params.get("id"));
+  }
+
+ async function loadList(status) {
+  document.getElementById("assessment-list").innerHTML = `<div style="text-align:center;padding:48px"><div class="spinner" style="margin:0 auto"></div></div>`;
+
+  try {
+    const snap = await getDocs(collection(db, "assessments"));
+    let results = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Filter by status if selected
+    if (status && status !== "") {
+      results = results.filter(a => a.status === status);
+    }
+
+    allAssessments = await Promise.all(results.map(async a => {
+      try {
+        const uSnap = await getDocs(collection(db, "assessments"));
+        a.student_name = uSnap.exists() ? uSnap.data().name : "Unknown";
+        a.student_email = uSnap.exists() ? uSnap.data().email : "";
+      } catch { a.student_name = "Unknown"; }
+      return a;
+    }));
+
+    document.getElementById("pending-badge").textContent =
+      allAssessments.filter(a => a.status === "pending").length;
+    renderList(allAssessments);
+  } catch(err) {
+    console.error("loadList error:", err);
+    document.getElementById("assessment-list").innerHTML =
+      `<div style="color:var(--red);padding:20px">Error: ${err.message}</div>`;
+  }
+
+
+    const snap = await getDocs(collection(db, "assessments"));
+    allAssessments = await Promise.all(snap.docs.map(async d => {
+      const a = { id: d.id, ...d.data() };
+      try {
+        const uSnap = await getDoc(doc(db,"users",a.student_id));
+        a.student_name = uSnap.exists() ? uSnap.data().name : "Unknown";
+        a.student_email = uSnap.exists() ? uSnap.data().email : "";
+      } catch { a.student_name = "Unknown"; }
+      return a;
+    }));
+
+    document.getElementById("pending-badge").textContent = allAssessments.filter(a => a.status === "pending").length;
+    renderList(allAssessments);
+  }
+
+  function renderList(list) {
+    const el = document.getElementById("assessment-list");
+    if (!list.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">🎉</div><h3>All clear!</h3><p>No assessments match this filter.</p></div>`;
+      return;
+    }
+    const sm = { pending:"badge-amber", scored:"badge-blue", reviewed:"badge-green" };
+    el.innerHTML = list.map(a => {
+      const date = a.created_at?.toDate?.()?.toLocaleDateString("en-IN",{day:"numeric",month:"short"}) || "—";
+      const score = a.ai_score !== null
+        ? `<span class="badge ${a.ai_score>=75?"badge-green":a.ai_score>=50?"badge-amber":"badge-red"}" style="font-size:11px">${a.ai_score}/100</span>` : "";
+      return `<div class="assessment-card" onclick="openReview('${a.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <span class="badge ${sm[a.status]||'badge-amber'}" style="font-size:11px">${a.status||'pending'}</span>
+          ${score}
+        </div>
+        <div style="font-weight:600;font-size:14px;margin-bottom:4px">${esc(a.topic)}</div>
+        <div style="font-size:12px;color:var(--text2)">${esc(a.student_name)} · ${date}</div>
+      </div>`;
+    }).join("");
+  }
+
+  window.openReview = async function(id) {
+    const panel = document.getElementById("review-panel");
+    panel.innerHTML = `<div style="text-align:center;padding:48px"><div class="spinner" style="margin:0 auto"></div></div>`;
+
+    try {
+      const aSnap = await getDoc(doc(db,"assessments",id));
+      if (!aSnap.exists()) { panel.innerHTML = `<div style="color:var(--red);padding:20px">Not found.</div>`; return; }
+      const a = { id: aSnap.id, ...aSnap.data() };
+
+      const uSnap = await getDoc(doc(db,"users",a.student_id));
+      const sSnap = await getDoc(doc(db,"students",a.student_id));
+      a.student_name = uSnap.exists() ? uSnap.data().name : "Unknown";
+      a.student_email = uSnap.exists() ? uSnap.data().email : "—";
+      a.student_roll = sSnap.exists() ? sSnap.data().roll_no : "—";
+      a.student_branch = sSnap.exists() ? sSnap.data().branch : "—";
+
+      const revQ = query(collection(db,"admin_reviews"), where("assessment_id","==",id));
+      const revSnap = await getDocs(revQ);
+      const review = revSnap.empty ? null : revSnap.docs[0].data();
+      const alreadyReviewed = a.status === "reviewed";
+
+      const initials = (a.student_name || "UK").split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2) || "?";
+      const scoreColor = s => s>=75?"var(--green)":s>=50?"var(--amber)":"var(--red)";
+
+      panel.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <!-- Student info -->
+          <div style="display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">${initials}</div>
+            <div>
+              <div style="font-weight:600;font-size:15px">${esc(a.student_name)}</div>
+              <div style="font-size:12px;color:var(--text2)">${esc(a.student_email)} · Roll: ${esc(a.student_roll)} · ${esc(a.student_branch)}</div>
+            </div>
+            ${alreadyReviewed?`<span class="badge badge-green" style="margin-left:auto">Reviewed</span>`:""}
+          </div>
+
+          <!-- Topic -->
+          <div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Topic</div>
+            <div style="font-weight:600;font-size:15px">${esc(a.topic)}</div>
+            ${a.domain?`<span class="badge badge-purple" style="font-size:11px;margin-top:6px;display:inline-flex">${esc(a.domain)}</span>`:""}
+          </div>
+
+          <!-- AI Score -->
+          ${a.ai_score!==null?`
+          <div style="background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.2);border-radius:var(--radius-sm);padding:14px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="text-align:center;min-width:60px">
+                <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:${scoreColor(a.ai_score)}">${a.ai_score}</div>
+                <div style="font-size:11px;color:var(--text2)">AI Score</div>
+              </div>
+              <div style="flex:1;font-size:13px;color:var(--text2);line-height:1.6">${esc(a.ai_feedback||"No AI feedback.")}</div>
+            </div>
+          </div>`:`<div class="callout callout-amber">⏳ AI scoring pending — you can still review manually.</div>`}
+
+          <!-- Essay -->
+          <div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:500">Essay</div>
+            <div class="essay-display">${esc(a.essay)}</div>
+          </div>
+
+          <!-- Review form or done state -->
+          ${alreadyReviewed ? `
+            <div class="callout callout-green">
+              ✅ Already reviewed. Admin score: <strong style="color:var(--green)">${review?.admin_score}/100</strong><br>
+              <span style="font-size:13px">${esc(review?.admin_feedback||"")}</span>
+            </div>
+          ` : `
+            <div style="border-top:1px solid var(--border);padding-top:20px">
+              <h4 style="font-size:14px;margin-bottom:16px">📝 Your Review</h4>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;align-items:end">
+                <div class="input-group">
+                  <label>Admin Score (0–100)</label>
+                  <input type="number" id="admin-score-input" class="input-field" min="0" max="100" placeholder="e.g. 78"/>
+                </div>
+                <div id="score-preview" style="font-family:var(--font-head);font-size:42px;font-weight:800;color:var(--text3);text-align:center;padding-bottom:4px">—</div>
+              </div>
+              <div class="input-group" style="margin-bottom:16px">
+                <label>Feedback / Comments</label>
+                <textarea id="admin-feedback-input" class="input-field" style="min-height:100px" placeholder="Write detailed feedback for the student…"></textarea>
+              </div>
+              <button class="btn btn-primary btn-full btn-lg" id="submit-review-btn" onclick="submitReview('${id}')">
+                <span id="review-btn-text">✅ Submit Review</span>
+                <span id="review-spinner" class="spinner hidden"></span>
+              </button>
+            </div>
+          `}
+        </div>`;
+
+      // Live score preview
+      const scoreInput = document.getElementById("admin-score-input");
+      if (scoreInput) {
+        scoreInput.oninput = () => {
+          const v = parseInt(scoreInput.value);
+          const el = document.getElementById("score-preview");
+          if (!isNaN(v) && v >= 0 && v <= 100) {
+            el.textContent = v;
+            el.style.color = v>=75?"var(--green)":v>=50?"var(--amber)":"var(--red)";
+          } else {
+            el.textContent = "—";
+            el.style.color = "var(--text3)";
+          }
+        };
+      }
+    } catch(err) {
+      panel.innerHTML = `<div style="color:var(--red);padding:20px;font-size:13px">Failed to load: ${err.message}</div>`;
+    }
+  };
+
+  window.submitReview = async function(assessmentId) {
+    const scoreVal = document.getElementById("admin-score-input").value;
+    const feedbackVal = document.getElementById("admin-feedback-input").value.trim();
+
+    if (!scoreVal || isNaN(parseInt(scoreVal))) { showToast("Please enter a valid score.", "error"); return; }
+    const score = parseInt(scoreVal);
+    if (score < 0 || score > 100) { showToast("Score must be between 0 and 100.", "error"); return; }
+    if (!feedbackVal) { showToast("Please write feedback for the student.", "error"); return; }
+
+    const btn = document.getElementById("submit-review-btn");
+    btn.disabled = true;
+    document.getElementById("review-btn-text").textContent = "Submitting…";
+    document.getElementById("review-spinner").classList.remove("hidden");
+
+    try {
+      // 1. Save admin review
+      await addDoc(collection(db,"admin_reviews"), {
+        assessment_id: assessmentId,
+        admin_id: currentUser.uid,
+        admin_score: score,
+        admin_feedback: feedbackVal,
+        reviewed_at: serverTimestamp()
+      });
+
+      // 2. Update assessment status
+      await updateDoc(doc(db,"assessments",assessmentId), { status: "reviewed" });
+
+      // 3. Call backend for comparison report
+      try {
+        const res = await fetch(`${API}/compare`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assessment_id: assessmentId, admin_score: score, admin_feedback: feedbackVal })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const rQ = query(collection(db,"reports"), where("assessment_id","==",assessmentId));
+          const rSnap = await getDocs(rQ);
+          if (!rSnap.empty) {
+            await updateDoc(doc(db,"reports",rSnap.docs[0].id), {
+              admin_report: data.admin_report,
+              comparison_report: data.comparison_report,
+              updated_at: serverTimestamp()
+            });
+          }
+        }
+      } catch (backendErr) { console.warn("Backend comparison failed:", backendErr.message); }
+
+      showToast("Review submitted successfully! ✓", "success");
+   document.getElementById("filter-status").onchange = function() {
+  loadList(this.value);
+};
+      openReview(assessmentId);
+    } catch (err) {
+      showToast("Failed to submit: " + err.message, "error");
+      btn.disabled = false;
+      document.getElementById("review-btn-text").textContent = "✅ Submit Review";
+      document.getElementById("review-spinner").classList.add("hidden");
+    }
+  };
+
+  function esc(s) { return s ? String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") : ""; }
+
+  init();
+</script>
+</body>
+</html>

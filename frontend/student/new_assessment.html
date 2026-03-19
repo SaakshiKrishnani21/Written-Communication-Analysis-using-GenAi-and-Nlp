@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>New Assessment — GenAI Assess</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div id="toast-container"></div>
+<div class="sidebar-overlay" id="sb-overlay"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">⚡</div><div class="logo-text">GenAI<span>Assess</span></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Student</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+      <a class="nav-item active" href="new_assessment.html"><span class="nav-icon">✏️</span> New Assessment</a>
+      <a class="nav-item" href="past_performance.html"><span class="nav-icon">📊</span> My Performance</a>
+      <a class="nav-item" href="feedback.html"><span class="nav-icon">💬</span> Feedback</a>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">?</div>
+        <div><div class="user-name">Loading…</div><div class="user-role">Student</div></div>
+        <span class="logout-btn" title="Sign Out">⏻</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <button class="hamburger" id="hamburger-btn"><span></span><span></span><span></span></button>
+      <h2>New Assessment</h2>
+      <div class="topbar-right">
+        <span id="wc-topbar" style="font-size:13px;color:var(--text2)">0 words</span>
+      </div>
+    </div>
+
+    <div class="page-content" style="max-width:860px">
+
+      <!-- Step indicator -->
+      <div style="display:flex;align-items:center;margin-bottom:28px" id="step-indicator">
+        <div class="step-item active" id="si1"><div class="step-circle">1</div><span>Domain</span></div>
+        <div class="step-line" id="sl1"></div>
+        <div class="step-item" id="si2"><div class="step-circle">2</div><span>Topic</span></div>
+        <div class="step-line" id="sl2"></div>
+        <div class="step-item" id="si3"><div class="step-circle">3</div><span>Write</span></div>
+        <div class="step-line" id="sl3"></div>
+        <div class="step-item" id="si4"><div class="step-circle">4</div><span>Submit</span></div>
+      </div>
+      <style>
+        .step-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--text3);transition:color .2s}
+        .step-item.active{color:var(--accent2)}.step-item.done{color:var(--green)}
+        .step-circle{width:32px;height:32px;border-radius:50%;background:var(--bg3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;transition:all .2s}
+        .step-item.active .step-circle{border-color:var(--accent);background:rgba(79,142,247,.15);color:var(--accent)}
+        .step-item.done .step-circle{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+        .step-line{flex:1;height:2px;background:var(--border);transition:background .3s;margin:0 4px;margin-bottom:16px}
+        .step-line.done{background:var(--green)}
+      </style>
+
+      <!-- STEP 1: Domain -->
+      <div id="step1" class="card">
+        <h3 style="font-size:16px;margin-bottom:6px">🎯 Select Your Domain</h3>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:20px">Choose a domain and we'll randomly generate an essay topic for you.</p>
+        <div class="domain-grid" id="domain-grid"></div>
+        <div style="margin-top:20px;display:flex;justify-content:flex-end">
+          <button class="btn btn-primary" id="step1-next">Generate Topic →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Topic -->
+      <div id="step2" class="card hidden">
+        <h3 style="font-size:16px;margin-bottom:6px">🎲 Your Random Topic</h3>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Regenerate as many times as you like. Once you continue, the topic is locked.</p>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+          <span id="domain-badge" class="badge badge-purple" style="font-size:13px"></span>
+        </div>
+        <div class="topic-result">
+          <div class="topic-text" id="topic-text">Loading…</div>
+          <button class="topic-dice" id="dice-btn" title="Generate new topic">🎲</button>
+        </div>
+        <div class="callout callout-blue" style="margin-top:16px">
+          💡 <strong style="color:var(--text)">Tip:</strong> Keep regenerating until you find a topic you're confident writing about.
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:20px">
+          <button class="btn btn-secondary" id="step2-back">← Change Domain</button>
+          <button class="btn btn-primary" id="step2-next">Accept Topic & Write →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Write -->
+      <div id="step3" class="card hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <h3 style="font-size:16px">✍️ Write Your Essay</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span id="wc-badge" class="badge badge-red">0 words</span>
+          </div>
+        </div>
+        <!-- Locked topic -->
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:16px">📌</span>
+          <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px">Essay Topic (locked)</div>
+          <div id="topic-locked" style="font-weight:600;font-size:14px"></div></div>
+          <span class="badge badge-green" style="margin-left:auto;font-size:11px">Locked</span>
+        </div>
+        <div class="callout callout-blue" style="margin-bottom:12px">
+          💡 Aim for <strong style="color:var(--text)">300–800 words</strong>. Include introduction, body paragraphs with examples, and a conclusion.
+        </div>
+        <!-- Word count bar -->
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:4px">
+          <span>Word count</span><span id="wc-detail">0 / 300 minimum</span>
+        </div>
+        <div class="wc-meter" style="margin-bottom:12px"><div class="wc-fill" id="wc-fill" style="width:0%;background:var(--red)"></div></div>
+        <div class="input-group" style="margin-bottom:12px">
+          <textarea id="essay-input" class="input-field" style="min-height:340px;font-size:15px;line-height:1.85" placeholder="Begin writing your essay here…&#10;&#10;Introduction: State your main argument.&#10;&#10;Body: Support with evidence and examples.&#10;&#10;Conclusion: Summarise your key points."></textarea>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px" id="clear-btn">🗑 Clear</button>
+          <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px" id="copy-btn">📋 Copy</button>
+          <span style="margin-left:auto;font-size:12px;color:var(--text3);align-self:center" id="char-count">0 chars</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <button class="btn btn-secondary" id="step3-back">← Back</button>
+          <button class="btn btn-primary" id="step3-next">Review & Submit →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Review & Submit -->
+      <div id="step4" class="card hidden">
+        <h3 style="font-size:16px;margin-bottom:16px">🔍 Review Before Submission</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Domain</div>
+            <div id="review-domain" style="font-weight:600;font-size:14px"></div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Word Count</div>
+            <div id="review-wc" style="font-weight:600;font-size:14px"></div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Status</div>
+            <span class="badge badge-amber">Ready to submit</span>
+          </div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Topic</div>
+          <div id="review-topic" style="font-weight:600;font-size:15px"></div>
+        </div>
+        <div style="margin-bottom:20px">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:8px">Essay Preview</div>
+          <div id="review-essay" class="essay-display"></div>
+        </div>
+        <div class="callout callout-blue" style="margin-bottom:20px">
+          🤖 After submission, our <strong style="color:var(--text)">Gemini AI + NLP engine</strong> will analyse your essay and generate a detailed score report.
+        </div>
+
+        <!-- Result (shown after submit) -->
+        <div id="result-area" class="hidden">
+          <div style="background:linear-gradient(135deg,rgba(79,142,247,.1),rgba(167,139,250,.07));border:1px solid rgba(79,142,247,.3);border-radius:var(--radius);padding:24px;margin-bottom:20px">
+            <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap">
+              <div style="text-align:center;min-width:80px">
+                <div id="result-score" style="font-family:var(--font-head);font-size:52px;font-weight:800;line-height:1">—</div>
+                <div style="font-size:12px;color:var(--text2)">/100</div>
+                <div id="result-label" class="badge" style="margin-top:6px;font-size:11px"></div>
+              </div>
+              <div style="flex:1;min-width:200px">
+                <div style="font-weight:600;font-size:15px;margin-bottom:8px">AI Assessment Complete ✓</div>
+                <div id="result-feedback" style="font-size:13px;color:var(--text2);line-height:1.7"></div>
+                <div id="score-breakdown" style="margin-top:14px"></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a href="past_performance.html" class="btn btn-primary">📄 View Full Report</a>
+            <button class="btn btn-secondary" id="new-assessment-btn">+ New Assessment</button>
+          </div>
+        </div>
+
+        <div id="submit-area" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <button class="btn btn-secondary" id="step4-back">← Edit Essay</button>
+          <button class="btn btn-primary btn-lg" id="submit-btn">
+            <span id="submit-text">🚀 Submit for AI Scoring</span>
+            <span id="submit-spinner" class="spinner hidden"></span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, populateSidebarUser, showToast } from "../js/auth.js";
+  import { db } from "../js/firebase.js";
+  import {
+    addDoc, collection, doc, updateDoc, serverTimestamp, getDocs, query, where
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const API = "http://localhost:5000";
+
+  const DOMAINS = {
+    "Computer Science": { icon: "💻", topics: ["The Role of Machine Learning in Cybersecurity","Edge Computing vs Cloud Computing","Quantum Computing: Opportunities and Challenges","Ethical Implications of Artificial Intelligence","The Future of Human-Computer Interaction","Blockchain Technology Beyond Cryptocurrency","Open Source Software: Benefits and Risks","The Impact of Big Data on Decision Making","Federated Learning: Privacy-Preserving AI","Autonomous Systems and Robotics in Industry"] },
+    "Electronics":      { icon: "⚡", topics: ["Internet of Things: Connecting the Physical World","5G Technology and Its Societal Impact","Neuromorphic Computing: Brain-Inspired Chips","VLSI Design Trends and Challenges","Wearable Electronics and Health Monitoring","Printed Electronics and Flexible Circuits","Power Electronics in Renewable Energy Systems","Nanotechnology in Semiconductor Manufacturing","Signal Processing in Modern Communication","MEMS Devices and Their Applications"] },
+    "Mechanical":       { icon: "⚙️", topics: ["Additive Manufacturing: Revolutionising Production","The Role of Robotics in Modern Manufacturing","Sustainable Engineering and Green Design","Advanced Materials in Aerospace Engineering","Computational Fluid Dynamics in Engineering","Industry 4.0 and Smart Manufacturing","Electric Vehicles: Engineering Challenges","Nanotechnology in Mechanical Engineering","Biomechanics and Medical Device Design","Lean Manufacturing Principles and Practices"] },
+    "Civil":            { icon: "🏗️", topics: ["Smart Cities: Infrastructure for the Future","Sustainable Construction Materials and Methods","Climate Change Adaptation in Urban Planning","Earthquake-Resistant Structural Design","Water Resource Management in Urban Areas","Green Building Certification and Practices","Transportation Infrastructure and Mobility","Remote Sensing in Geotechnical Engineering","Waste Management in Developing Cities","Digital Twins in Civil Infrastructure"] },
+    "Biotechnology":    { icon: "🧬", topics: ["CRISPR-Cas9: Gene Editing Ethics and Applications","Bioinformatics and Personalised Medicine","Stem Cell Therapy: Promise and Reality","Synthetic Biology and Bioengineering","Vaccine Development in the Post-COVID Era","Agricultural Biotechnology and Food Security","Bioremediation of Environmental Pollutants","Microbiome Research and Human Health","Biosensors for Disease Diagnosis","Marine Biotechnology and Blue Economy"] },
+    "Information Technology": { icon: "🌐", topics: ["Zero Trust Security Architecture","Cloud Migration Strategies for Enterprises","DevOps Culture and Continuous Delivery","Digital Transformation in Healthcare","Data Privacy Regulations and Compliance","Microservices vs Monolithic Architecture","AI-Driven Business Intelligence","Augmented Reality in E-Commerce","Low-Code Platforms: Democratising Development","Green IT and Sustainable Data Centres"] },
+    "Environment":      { icon: "🌿", topics: ["Renewable Energy Transition: Barriers and Solutions","Carbon Capture and Storage Technologies","Biodiversity Conservation in the Anthropocene","Circular Economy and Waste Reduction","Environmental Impact of Fast Fashion","Ocean Plastic Pollution: Causes and Solutions","Urban Heat Islands and Green Infrastructure","Nuclear Energy as a Climate Solution","Sustainable Agriculture and Food Systems","Environmental Justice in Developing Nations"] },
+    "General":          { icon: "📚", topics: ["The Impact of Social Media on Mental Health","Remote Work: Benefits and Challenges","Universal Basic Income: A Viable Solution?","Space Exploration: Worth the Investment?","Digital Literacy in the 21st Century","Globalisation and Cultural Identity","The Ethics of Artificial Intelligence in Society","Misinformation and the Role of Media","Future of Education in a Digital World","Income Inequality and Economic Mobility"] }
+  };
+
+  let currentUser = null;
+  let selectedDomain = null;
+  let currentTopic = "";
+
+  // Sidebar
+  document.getElementById("hamburger-btn").onclick = () => {
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("sb-overlay").classList.toggle("show");
+  };
+  document.getElementById("sb-overlay").onclick = () => {
+    document.getElementById("sidebar").classList.remove("open");
+    document.getElementById("sb-overlay").classList.remove("show");
+  };
+
+  async function init() {
+    const { user } = await requireAuth("student");
+    currentUser = user;
+    await populateSidebarUser(user);
+    buildDomainGrid();
+    setupWordCount();
+    wireButtons();
+  }
+
+  function buildDomainGrid() {
+    document.getElementById("domain-grid").innerHTML = Object.entries(DOMAINS).map(([name, d]) =>
+      `<div class="domain-card" data-domain="${name}" onclick="selectDomain('${name}')">
+        <div class="domain-icon">${d.icon}</div>
+        <div class="domain-name">${name}</div>
+      </div>`
+    ).join("");
+  }
+
+  window.selectDomain = function(name) {
+    selectedDomain = name;
+    document.querySelectorAll(".domain-card").forEach(c =>
+      c.classList.toggle("selected", c.dataset.domain === name)
+    );
+  };
+
+  function setStep(n) {
+    ["step1","step2","step3","step4"].forEach((id, i) => {
+      document.getElementById(id).classList.toggle("hidden", i + 1 !== n);
+    });
+    [1,2,3,4].forEach(i => {
+      document.getElementById(`si${i}`).className = `step-item ${i < n ? "done" : i === n ? "active" : ""}`;
+    });
+    [1,2,3].forEach(i => {
+      document.getElementById(`sl${i}`).className = `step-line ${i < n ? "done" : ""}`;
+    });
+  }
+
+  function rollTopic(animate = false) {
+    currentTopic = DOMAINS[selectedDomain].topics[Math.floor(Math.random() * 10)];
+    if (animate) {
+      const btn = document.getElementById("dice-btn");
+      btn.classList.add("dice-spinning");
+      setTimeout(() => btn.classList.remove("dice-spinning"), 400);
+      const el = document.getElementById("topic-text");
+      el.textContent = "";
+      let i = 0;
+      const iv = setInterval(() => { el.textContent = currentTopic.slice(0, ++i); if (i >= currentTopic.length) clearInterval(iv); }, 16);
+    } else {
+      document.getElementById("topic-text").textContent = currentTopic;
+    }
+  }
+
+  function wireButtons() {
+    // Step 1 → 2
+    document.getElementById("step1-next").onclick = () => {
+      if (!selectedDomain) { showToast("Please select a domain first.", "error"); return; }
+      rollTopic(false);
+      document.getElementById("domain-badge").textContent = DOMAINS[selectedDomain].icon + " " + selectedDomain;
+      setStep(2);
+    };
+
+    // Dice reroll
+    document.getElementById("dice-btn").onclick = () => rollTopic(true);
+
+    // Step 2 back
+    document.getElementById("step2-back").onclick = () => setStep(1);
+
+    // Step 2 → 3
+    document.getElementById("step2-next").onclick = () => {
+      document.getElementById("topic-locked").textContent = currentTopic;
+      setStep(3);
+      document.getElementById("essay-input").focus();
+    };
+
+    // Step 3 back
+    document.getElementById("step3-back").onclick = () => setStep(2);
+
+    // Clear / Copy
+    document.getElementById("clear-btn").onclick = () => {
+      if (confirm("Clear your essay? This cannot be undone.")) {
+        document.getElementById("essay-input").value = "";
+        document.getElementById("essay-input").dispatchEvent(new Event("input"));
+      }
+    };
+    document.getElementById("copy-btn").onclick = () => {
+      navigator.clipboard.writeText(document.getElementById("essay-input").value);
+      showToast("Essay copied to clipboard!", "success", 1500);
+    };
+
+    // Step 3 → 4
+    document.getElementById("step3-next").onclick = () => {
+      const essay = document.getElementById("essay-input").value.trim();
+      if (essay.length < 50) { showToast("Essay is too short. Write at least 50 characters.", "error"); return; }
+      const wc = essay.split(/\s+/).filter(Boolean).length;
+      document.getElementById("review-domain").textContent = DOMAINS[selectedDomain]?.icon + " " + selectedDomain;
+      document.getElementById("review-wc").textContent = wc + " words";
+      document.getElementById("review-topic").textContent = currentTopic;
+      document.getElementById("review-essay").textContent = essay.slice(0, 600) + (essay.length > 600 ? "…" : "");
+      setStep(4);
+    };
+
+    // Step 4 back
+    document.getElementById("step4-back").onclick = () => setStep(3);
+
+    // Submit
+    document.getElementById("submit-btn").onclick = submitAssessment;
+
+    // New assessment
+    document.getElementById("new-assessment-btn").onclick = () => location.reload();
+  }
+
+  function setupWordCount() {
+    const ta = document.getElementById("essay-input");
+    ta.addEventListener("input", () => {
+      const words = ta.value.trim().split(/\s+/).filter(Boolean).length;
+      const chars = ta.value.length;
+      const pct = Math.min(100, Math.round((words / 300) * 100));
+      const color = words >= 300 ? "var(--green)" : words >= 150 ? "var(--amber)" : "var(--red)";
+      document.getElementById("wc-badge").textContent = words + " words";
+      document.getElementById("wc-badge").className = `badge ${words >= 300 ? "badge-green" : words >= 150 ? "badge-amber" : "badge-red"}`;
+      document.getElementById("wc-topbar").textContent = words + " words";
+      document.getElementById("wc-detail").textContent = `${words} / 300 minimum`;
+      document.getElementById("char-count").textContent = chars + " chars";
+      document.getElementById("wc-fill").style.width = pct + "%";
+      document.getElementById("wc-fill").style.background = color;
+    });
+  }
+
+  async function submitAssessment() {
+    const essay = document.getElementById("essay-input").value.trim();
+    const btn = document.getElementById("submit-btn");
+    btn.disabled = true;
+    document.getElementById("submit-text").textContent = "Scoring with AI…";
+    document.getElementById("submit-spinner").classList.remove("hidden");
+
+    try {
+      // 1. Save to Firestore
+      const docRef = await addDoc(collection(db, "assessments"), {
+        student_id: currentUser.uid,
+        topic: currentTopic,
+        essay: essay,
+        domain: selectedDomain,
+        ai_score: null,
+        status: "pending",
+        created_at: serverTimestamp()
+      });
+
+      // 2. Call Python backend
+      let score = null, feedback = "", breakdown = {};
+      try {
+        const res = await fetch(`${API}/score`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assessment_id: docRef.id, topic: currentTopic, essay, domain: selectedDomain })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          score = data.score;
+          feedback = data.feedback;
+          breakdown = data.breakdown || {};
+
+          // 3. Update Firestore with score
+          await updateDoc(doc(db, "assessments", docRef.id), {
+            ai_score: score, ai_feedback: feedback,
+            ai_breakdown: breakdown, status: "scored"
+          });
+
+          // 4. Save report
+          await addDoc(collection(db, "reports"), {
+            assessment_id: docRef.id, student_id: currentUser.uid,
+            ai_report: data.report || "", admin_report: null,
+            comparison_report: null, created_at: serverTimestamp()
+          });
+        } else {
+          throw new Error("Backend returned " + res.status);
+        }
+      } catch (backendErr) {
+        console.warn("Backend unavailable:", backendErr.message);
+        // Essay still saved — admin can review manually
+      }
+
+      // Show result
+      document.getElementById("submit-area").classList.add("hidden");
+      document.getElementById("result-area").classList.remove("hidden");
+
+      const scoreEl = document.getElementById("result-score");
+      if (score !== null) {
+        scoreEl.textContent = score;
+        scoreEl.style.color = score >= 75 ? "var(--green)" : score >= 50 ? "var(--amber)" : "var(--red)";
+        const labelMap = [[85,"Excellent","badge-green"],[70,"Good","badge-blue"],[50,"Average","badge-amber"],[0,"Needs Work","badge-red"]];
+        const [,lbl,cls] = labelMap.find(([t]) => score >= t);
+        document.getElementById("result-label").textContent = lbl;
+        document.getElementById("result-label").className = `badge ${cls}`;
+        document.getElementById("result-feedback").textContent = feedback || "AI analysis complete.";
+
+        if (Object.keys(breakdown).length) {
+          const labels = { content:"Content & Relevance", structure:"Structure", language:"Language", grammar:"Grammar", critical_thinking:"Critical Thinking" };
+          document.getElementById("score-breakdown").innerHTML = Object.entries(breakdown).map(([k, v]) => {
+            const col = v >= 15 ? "var(--green)" : v >= 10 ? "var(--amber)" : "var(--red)";
+            return `<div class="breakdown-row"><div class="label">${labels[k]||k}</div><div class="bar-wrap"><div class="bar-fill" style="width:${(v/20)*100}%;background:${col}"></div></div><div class="score-val" style="color:${col}">${v}/20</div></div>`;
+          }).join("");
+        }
+        showToast("Essay scored successfully!", "success");
+      } else {
+        scoreEl.textContent = "Saved";
+        scoreEl.style.color = "var(--amber)";
+        document.getElementById("result-feedback").textContent = "Your essay has been saved. The AI backend is currently offline — your submission will be reviewed manually by an admin.";
+        showToast("Essay saved! Will be reviewed manually.", "info");
+      }
+    } catch (err) {
+      showToast("Submission failed: " + err.message, "error");
+      btn.disabled = false;
+      document.getElementById("submit-text").textContent = "🚀 Submit for AI Scoring";
+      document.getElementById("submit-spinner").classList.add("hidden");
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
