@@ -470,5 +470,5 @@ This project is for educational purposes.
 ---
 
 <div align="center">
-  Built with ⚡ by Saakshi Krishnani
+  Built by Saakshi Krishnani
 </div>
