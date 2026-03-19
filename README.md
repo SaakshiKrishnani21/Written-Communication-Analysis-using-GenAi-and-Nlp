@@ -1,274 +1,474 @@
-# AssignmentCheck - UI/UX Improvement Documentation
+# ⚡ GenAI Written Assessment System
 
-## Project Overview
-**AssignmentCheck** is an academic assessment management system with user and admin interfaces featuring modern, attractive designs.
+> An AI-powered essay evaluation platform that combines **Google Gemini AI** and **NLP** to automatically score student essays across 5 dimensions, with a human expert review layer and detailed comparison reports.
 
-## What Was Improved
-
-### 1. **Branding Update**
-- ✅ Renamed all occurrences of "BotCruit/Broutcut" to "AssignmentCheck"
-- ✅ Updated email addresses to support@assignmentcheck.com
-- ✅ Updated admin credentials to admin@assignmentcheck.com
-
-### 2. **Design Architecture**
-- ✅ **Embedded CSS**: Each page has unique, attractive embedded styling
-- ✅ **No External Dependencies**: Pure HTML and CSS in each file
-- ✅ **Standalone Pages**: Each file is self-contained and works independently
-- ✅ **Modern Gradients**: Beautiful gradient backgrounds and color schemes
-
-### 3. **Visual Improvements**
-
-#### Unique Page Designs
-Each page has its own distinctive, beautiful design:
-
-**Login Page**
-- Purple gradient background (#667eea to #764ba2)
-- Floating animated circles
-- Glass-morphism card design
-- Smooth slide-up animation
-
-**Admin Panel**
-- Blue gradient sidebar (#1e3c72 to #2a5298)
-- Stats cards with hover effects
-- Modern table design with gradients
-- Professional color scheme
-
-**User Dashboard**
-- Pink/purple gradient (#fc466b to #3f5efb)
-- User profile section with avatar
-- Interactive sidebar with smooth transitions
-- Clean, modern forms
-
-**Feedback Page**
-- Pink gradient background (#f093fb to #f5576c)
-- Interactive star rating system
-- Form validation and animations
-- Responsive design
-
-**Help Center**
-- Pastel gradient (#a8edea to #fed6e3)
-- Expandable FAQ sections
-- Search functionality
-- Contact support button
-
-**New Assessment**
-- Blue gradient (#4facfe to #00f2fe)
-- Pulsing icon animation
-- Info cards showing details
-- Call-to-action button
-
-**Past Assessments**
-- Warm gradient (#ffecd2 to #fcb69f)
-- Statistics overview cards
-- Color-coded status badges
-- Score highlighting
-
-**Request Assessment**
-- Aqua gradient (#89f7fe to #66a6ff)
-- Priority level selector
-- Character counter
-- Form validation
-
-**Settings**
-- Purple gradient (#e0c3fc to #8ec5fc)
-- Toggle switches for preferences
-- Danger zone for account deletion
-- Profile sections
-
-#### Common Improvements Across All Pages
-- **Smooth Animations**: Fade-ins, slide-ups, hover effects
-- **Modern Gradients**: Unique color schemes for each page
-- **Interactive Elements**: Buttons with 3D effects, hover states
-- **Status Badges**: Color-coded pills for status indicators
-- **Form Focus States**: Beautiful focus animations on inputs
-- **Responsive Design**: Mobile-friendly layouts
-- **Custom Icons**: Emoji-based icons for visual appeal
-
-### 4. **User Experience Enhancements**
-- ✅ **Unique Visual Identity**: Each page has distinctive colors and animations
-- ✅ **Smooth Transitions**: All interactive elements have 0.3s ease transitions
-- ✅ **Hover Effects**: Visual feedback on all clickable elements
-- ✅ **Focus States**: Clear focus indicators for accessibility
-- ✅ **Animations**: Page load animations, floating elements, pulses
-- ✅ **Responsive Design**: Mobile-friendly layout (flexbox/grid)
-- ✅ **Interactive Components**: Rating systems, toggles, progress bars
-- ✅ **Character Counters**: Live character count for text areas
-
-### 5. **Page-Specific Features**
-
-**Login (login.html)**
-- Animated background circles
-- Glass-morphism design
-- Icon-based input fields
-- Enter key support
-
-**Admin (admin.html)**
-- Dashboard with stats cards
-- Assessment management tables
-- Section navigation
-- Gradient sidebar
-
-**User (user.html)**
-- Profile avatar
-- Multi-section dashboard
-- Form management
-- Past performance tracking
-
-**Feedback (feedback.html)**
-- Interactive star rating
-- Form categories
-- Character counter
-- Animated submission
-
-**Help Center (help_center.html)**
-- FAQ accordion-style
-- Search functionality
-- Contact support
-- Hover animations
-
-**New Assessment (new_assessment.html)**
-- Assessment details cards
-- Pulsing call-to-action
-- Timer/question info
-- Back navigation
-
-**Past Assessments (past_assisment.html)**
-- Stats overview
-- Performance table
-- Color-coded scores
-- Status badges
-
-**Request Assessment (request_assessment.html)**
-- Priority selector
-- Type dropdown
-- Reason textarea
-- Character limit
-
-**Settings (settings.html)**
-- Profile management
-- Security options
-- Toggle preferences
-- Danger zone
-
-**User Dashboard (user_dashboard.html)**
-- Profile completion tracker
-- Progress bar
-- Form validation
-- Character counter
-
-**Home (home.html)**
-- Alternative user interface
-- Sidebar navigation
-- Multi-section layout
-- Green gradient theme
-
-## File Structure
-
-```
-AssignmentCheck/
-├── login.html              # Login page (Purple gradient)
-├── admin.html              # Admin dashboard (Blue gradient)
-├── user.html               # User dashboard (Pink gradient)
-├── home.html               # Alternative user page (Green gradient)
-├── feedback.html           # Feedback form (Pink gradient)
-├── help_center.html        # Help & FAQ (Pastel gradient)
-├── new_assessment.html     # New assessment (Blue gradient)
-├── past_assisment.html     # Past assessments (Warm gradient)
-├── request_assessment.html # Request form (Aqua gradient)
-├── settings.html           # Settings page (Purple gradient)
-├── user_dashboard.html     # User dashboard standalone (Pink gradient)
-└── README.md               # Documentation
-```
-
-## Key Features Maintained
-- ✅ Login functionality (admin/user routing)
-- ✅ Sidebar navigation with active states
-- ✅ Section switching via JavaScript
-- ✅ Form submissions
-- ✅ Table displays
-- ✅ All original functionality intact
-
-## Login Credentials
-- **Admin**: admin@assignmentcheck.com / Admin@123
-- **User**: Any other credentials
-
-## Technical Details
-- **No Frameworks**: Pure HTML, CSS, JavaScript
-- **Browser Compatibility**: Modern browsers (Chrome, Firefox, Edge, Safari)
-- **Responsive**: Works on desktop and mobile devices
-- **Accessibility**: Proper labels and semantic HTML
-
-## Color Palettes by Page
-
-| Page | Primary Colors | Usage |
-|------|---------------|-------|
-| Login | #667eea → #764ba2 | Purple gradient theme |
-| Admin | #1e3c72 → #2a5298 | Professional blue |
-| User | #fc466b → #3f5efb | Vibrant pink/blue |
-| Feedback | #f093fb → #f5576c | Pink gradient |
-| Help Center | #a8edea → #fed6e3 | Pastel gradient |
-| New Assessment | #4facfe → #00f2fe | Bright blue |
-| Past Assessments | #ffecd2 → #fcb69f | Warm peach |
-| Request | #89f7fe → #66a6ff | Aqua blue |
-| Settings | #e0c3fc → #8ec5fc | Purple/blue |
-| User Dashboard | #d299c2 → #fef9d7 | Pink/yellow |
-| Home | #134e5e → #71b280 | Green gradient |
-
-## Technical Details
-- **No External Dependencies**: All CSS embedded in HTML files
-- **Pure HTML/CSS/JavaScript**: No frameworks required
-- **Standalone Files**: Each page works independently
-- **Modern CSS**: Gradients, animations, transitions, flexbox, grid
-- **Accessibility**: Proper labels, focus states, semantic HTML
-- **Performance**: Optimized animations, no external requests
-
-## Key Features
-
-### Design Features
-✨ **Unique Page Identities**: Each page has its own color scheme and style  
-🎨 **Modern Gradients**: Beautiful gradient backgrounds throughout  
-✨ **Smooth Animations**: Fade-ins, slide-ups, hover effects, pulses  
-🎯 **Interactive Elements**: Ratings, toggles, progress bars, counters  
-📱 **Fully Responsive**: Works on desktop, tablet, and mobile  
-🎭 **Emoji Icons**: Fun, modern emoji-based iconography  
-
-### Functional Features
-✅ **Login System**: Admin/user routing (admin@assignmentcheck.com / Admin@123)  
-✅ **Dashboard Navigation**: Multi-section interfaces with smooth transitions  
-✅ **Form Management**: Validation, character counters, progress tracking  
-✅ **Data Tables**: Sortable, color-coded assessment histories  
-✅ **Settings Panel**: Profile management, preferences, security  
-✅ **Feedback System**: Rating interface, categorized feedback  
-
-### User Experience
-🚀 **Fast Load Times**: No external dependencies  
-💫 **Smooth Transitions**: 0.3s ease animations throughout  
-🎨 **Visual Feedback**: Hover states, focus indicators, active states  
-📊 **Progress Tracking**: Visual completion indicators  
-🔒 **Secure Forms**: Password fields, validation  
-♿ **Accessible**: Proper labels, semantic HTML, keyboard navigation  
-
-## Browser Support
-- ✅ Chrome 90+
-- ✅ Firefox 88+
-- ✅ Safari 14+
-- ✅ Edge 90+
-- ✅ Modern mobile browsers
-
-## Improvements Summary
-1. **Unique Visual Design**: Each page has distinctive, attractive styling
-2. **Modern Aesthetics**: Gradients, animations, glass-morphism effects
-3. **Better UX**: Smooth interactions, clear visual feedback
-4. **Self-Contained**: No external CSS files needed
-5. **Responsive**: Mobile-friendly layouts with flexbox/grid
-6. **Interactive**: Rating systems, toggles, live counters
-7. **Professional**: College-appropriate, polished appearance
-8. **Performance**: Fast loading, optimized animations
+![Platform](https://img.shields.io/badge/Platform-Web-blue)
+![AI](https://img.shields.io/badge/AI-Gemini%201.5%20Flash-orange)
+![Backend](https://img.shields.io/badge/Backend-Python%20Flask-green)
+![Database](https://img.shields.io/badge/Database-Firebase%20Firestore-yellow)
+![Auth](https://img.shields.io/badge/Auth-Firebase%20Authentication-red)
 
 ---
 
-**Project Type**: Academic Assessment Management System  
-**Technology Stack**: HTML5, CSS3, JavaScript (Vanilla)  
-**Design Style**: Modern, Gradient-based, Interactive  
-**Target Audience**: Educational Institutions, Students, Administrators  
-**Deployment**: Simply open any HTML file in a browser - no setup required!
+## 📸 Screenshots
+
+| Login | Student Dashboard | New Assessment |
+|-------|-------------------|----------------|
+| Beautiful split-screen login with Google OAuth | Score trends, charts, recent assessments | 4-step wizard with domain picker and random topic |
+
+| Admin Dashboard | Check Assessments | History |
+|-----------------|-------------------|---------|
+| Pending queue, activity charts | Full review workflow | Searchable paginated table |
+
+---
+
+## ✨ Features
+
+### 🎓 Student Side
+- **Google OAuth + Email/Password** login
+- **Domain-based Random Topic Generation** — 8 domains × 10 topics each
+- **4-Step Assessment Wizard** — Domain → Topic → Write → Submit
+- **Live Word Count Meter** with colour-coded progress bar
+- **AI Scoring Results** with 5-dimension breakdown bars
+- **My Performance** — filterable list with side-panel detail view
+- **Full Report Modal** — AI Report, Admin Review, and Comparison tabs
+- **Feedback Page** — star ratings saved to Firestore
+- **Settings** — edit profile, notification preferences, password reset
+
+### 👨‍🏫 Admin Side
+- **Role-based routing** — automatically redirects to correct dashboard
+- **Check Assessments** — read essay, see AI score, submit your own score + feedback
+- **Live Score Preview** — colour changes as you type the score
+- **Comparison Report** auto-generated by Gemini after admin review
+- **History** — search, filter by status, paginated table, View/Review buttons
+- **Help Center** — searchable FAQ accordion
+- **Contact** — support ticket form + backend health check
+
+### 🤖 AI Engine
+- **Google Gemini 1.5 Flash** for intelligent essay scoring and report generation
+- **NLTK NLP** feature extraction (word count, TTR, sentence variance, transitions)
+- **5 Scoring Dimensions** — Content, Structure, Language, Grammar, Critical Thinking
+- **Rule-based fallback** when Gemini is unavailable
+- **AI vs Human Comparison Report** highlighting agreement and divergence
+- **HTML Email Notifications** sent on scoring and review
+
+---
+
+## 🗂️ Project Structure
+
+```
+genai-written-assessment/
+│
+├── frontend/
+│   ├── login.html
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   ├── firebase.js          # Firebase config + exports
+│   │   ├── auth.js              # Login, logout, auth guard, role routing
+│   │   ├── student.js           # Domain/topic bank, assessment helpers
+│   │   └── admin.js             # Admin Firestore helpers
+│   ├── student/
+│   │   ├── dashboard.html       # Score trends, recent assessments
+│   │   ├── new_assessment.html  # Domain → Topic → Write → Submit wizard
+│   │   ├── past_performance.html # Assessment list + report modal
+│   │   ├── feedback.html        # Star rating feedback form
+│   │   └── settings.html        # Profile, preferences, account
+│   └── admin/
+│       ├── dashboard.html       # Stats, charts, pending queue
+│       ├── check_assessment.html # Review workflow
+│       ├── history.html         # Full history table
+│       ├── help_center.html     # FAQ accordion
+│       └── contact.html         # Support ticket form
+│
+├── backend/
+│   ├── app.py                   # Flask API — /score, /compare, /health, /topics
+│   ├── nlp_engine.py            # Gemini + NLTK essay scoring engine
+│   ├── genai_report.py          # AI narrative report generator
+│   └── email_sender.py          # HTML email notifications
+│
+├── charts/
+│   └── chart_config.js          # Shared Chart.js factory functions
+│
+└── requirements.txt
+```
+
+---
+
+## 🔥 Firebase Database Structure
+
+```
+Firestore
+│
+├── users/
+│     └── {uid}
+│           name, email, role (student | admin), createdAt
+│
+├── students/
+│     └── {uid}
+│           roll_no, branch, year, updated_at
+│
+├── assessments/
+│     └── {assessment_id}
+│           student_id, topic, essay, domain
+│           ai_score, ai_feedback, ai_breakdown
+│           status (pending | scored | reviewed)
+│           created_at
+│
+├── admin_reviews/
+│     └── {review_id}
+│           assessment_id, admin_id
+│           admin_score, admin_feedback, reviewed_at
+│
+├── reports/
+│     └── {report_id}
+│           assessment_id, student_id
+│           ai_report, admin_report, comparison_report
+│           created_at, updated_at
+│
+├── feedback/
+│     └── {feedback_id}
+│           student_id, ratings, overall_comment
+│           feedback_type, suggestion, created_at
+│
+└── support_tickets/
+      └── {ticket_id}
+            admin_id, name, email, category
+            priority, subject, description
+            status (open), created_at
+```
+
+---
+
+## 🚀 Setup Guide
+
+### Prerequisites
+- Python 3.11 or 3.12
+- Node.js (optional — only for VS Code Live Server)
+- Firebase project
+- Google Gemini API key
+
+---
+
+### Step 1 — Clone the repository
+
+```bash
+git clone https://github.com/your-username/genai-written-assessment.git
+cd genai-written-assessment
+```
+
+---
+
+### Step 2 — Firebase Setup
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com)
+2. Create a new project
+3. Enable **Authentication** → Sign-in methods → Enable **Email/Password** and **Google**
+4. Create **Firestore Database** → Start in test mode → choose `asia-south1` region
+5. Go to **Project Settings** → Your apps → Register web app → copy config
+6. Go to **Service Accounts** → Generate new private key → save as `backend/serviceAccountKey.json`
+
+---
+
+### Step 3 — Configure Firebase in frontend
+
+Open `frontend/js/firebase.js` and replace with your config:
+
+```js
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+```
+
+---
+
+### Step 4 — Get Gemini API Key
+
+1. Go to [aistudio.google.com](https://aistudio.google.com/app/apikey)
+2. Click **Create API Key**
+3. Copy the key
+
+---
+
+### Step 5 — Backend Setup
+
+```bash
+# Create virtual environment with Python 3.11
+py -3.11 -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # Mac/Linux
+
+# Install dependencies
+cd backend
+pip install -r ../requirements.txt
+```
+
+Create `backend/.env`:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_gmail_app_password
+APP_URL=http://localhost:5500
+```
+
+---
+
+### Step 6 — Run the backend
+
+```bash
+cd backend
+python app.py
+```
+
+Test it: open `http://localhost:5000/health` — you should see:
+```json
+{"status": "ok", "firebase": true}
+```
+
+---
+
+### Step 7 — Run the frontend
+
+1. Install **Live Server** extension in VS Code
+2. Right-click `frontend/login.html` → **Open with Live Server**
+3. Opens at `http://127.0.0.1:5500/frontend/login.html`
+
+---
+
+### Step 8 — Create Admin Account
+
+1. Login with Google — this creates a student account
+2. Go to Firebase Console → Firestore → `users` collection
+3. Find your user document → change `role` from `"student"` to `"admin"`
+4. Log out and log back in → redirected to Admin Dashboard ✅
+
+---
+
+### Step 9 — Create Firestore Indexes
+
+The app needs composite indexes. When you first load a page you'll see a console error with a direct link. Click it to auto-create each index, or create manually:
+
+| Collection | Field 1 | Field 2 |
+|---|---|---|
+| `assessments` | `student_id` ASC | `created_at` DESC |
+| `assessments` | `status` ASC | `created_at` DESC |
+| `reports` | `assessment_id` ASC | — |
+| `admin_reviews` | `assessment_id` ASC | — |
+
+---
+
+## 🎯 How It Works
+
+### Full Assessment Flow
+
+```
+Student selects domain
+        ↓
+Random topic generated from 80-topic bank
+        ↓
+Student writes essay (300-800 words)
+        ↓
+Essay saved to Firestore (status: pending)
+        ↓
+Python backend called → NLTK extracts features
+        ↓
+Gemini 1.5 Flash scores 5 dimensions (0-20 each)
+        ↓
+Score + feedback saved to Firestore (status: scored)
+        ↓
+AI report generated and saved
+        ↓
+Student sees score with breakdown bars
+        ↓
+Admin reviews essay → enters own score + feedback
+        ↓
+Comparison report generated by Gemini
+        ↓
+Student sees both scores + 3-tab full report
+```
+
+### AI Scoring Dimensions
+
+| Dimension | Max | What it measures |
+|---|---|---|
+| Content & Relevance | 20 | Addresses topic, depth of argument |
+| Structure & Organisation | 20 | Intro/body/conclusion, flow |
+| Language & Vocabulary | 20 | Word choice, variety, sophistication |
+| Grammar & Mechanics | 20 | Sentence structure, punctuation |
+| Critical Thinking | 20 | Analysis, insight, original ideas |
+| **Total** | **100** | |
+
+### Topic Domains
+
+| Domain | Topics |
+|---|---|
+| 💻 Computer Science | 10 topics |
+| ⚡ Electronics | 10 topics |
+| ⚙️ Mechanical | 10 topics |
+| 🏗️ Civil | 10 topics |
+| 🧬 Biotechnology | 10 topics |
+| 🌐 Information Technology | 10 topics |
+| 🌿 Environment | 10 topics |
+| 📚 General | 10 topics |
+
+---
+
+## 🔌 API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Check backend status |
+| `POST` | `/score` | Score an essay with Gemini + NLTK |
+| `POST` | `/compare` | Generate AI vs admin comparison report |
+| `GET` | `/topics?domain=X` | Get random topic(s) for a domain |
+
+### POST /score
+```json
+{
+  "assessment_id": "abc123",
+  "topic": "Impact of AI on Healthcare",
+  "essay": "Artificial intelligence is transforming...",
+  "domain": "Computer Science"
+}
+```
+
+### Response
+```json
+{
+  "score": 78,
+  "feedback": "Strong argument with good structure...",
+  "report": "Full narrative evaluation report...",
+  "breakdown": {
+    "content": 16,
+    "structure": 15,
+    "language": 14,
+    "grammar": 17,
+    "critical_thinking": 16
+  }
+}
+```
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | HTML5, CSS3, Vanilla JavaScript (ES Modules) |
+| Authentication | Firebase Authentication (Google OAuth + Email) |
+| Database | Firebase Firestore |
+| Backend | Python 3.11, Flask, Flask-CORS |
+| AI | Google Gemini 1.5 Flash |
+| NLP | NLTK 3.8 |
+| Charts | Chart.js 4.4 |
+| Email | Python smtplib (SMTP) |
+| Fonts | Syne + DM Sans (Google Fonts) |
+
+---
+
+## 📧 Email Setup (Optional)
+
+To enable email notifications when essays are scored or reviewed:
+
+1. Go to your Google Account → Security → **App Passwords**
+2. Enable 2-Step Verification first
+3. Generate an App Password for Mail
+4. Add to `backend/.env`:
+```env
+SMTP_USER=your@gmail.com
+SMTP_PASS=xxxx xxxx xxxx xxxx
+```
+
+---
+
+## 🔒 Firestore Security Rules
+
+Replace test mode rules before going to production:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth.uid == userId;
+      allow read: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /assessments/{id} {
+      allow read, write: if request.auth != null;
+    }
+    match /reports/{id} {
+      allow read: if request.auth != null;
+    }
+    match /admin_reviews/{id} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    match /feedback/{id} {
+      allow create: if request.auth != null;
+    }
+    match /support_tickets/{id} {
+      allow create: if request.auth != null;
+    }
+  }
+}
+```
+
+---
+
+## ⚠️ Common Issues
+
+| Problem | Solution |
+|---|---|
+| CSS not loading | Check `../css/style.css` path in HTML files |
+| Firebase not defined | Ensure `firebase.js` uses ES module imports |
+| Query requires index | Click the link in browser console to auto-create |
+| AI score shows "Pending" | Start the Python backend: `python app.py` |
+| Google sign-in fails | Add `127.0.0.1` to Firebase → Auth → Authorized domains |
+| Admin redirect not working | Change `role` to `"admin"` in Firestore and re-login |
+| Python 3.14 errors | Use Python 3.11 — `py -3.11 -m venv venv` |
+
+---
+
+## 👩‍💻 Development
+
+```bash
+# Backend (terminal 1)
+cd backend
+venv\Scripts\activate
+python app.py
+
+# Frontend (VS Code)
+# Right-click frontend/login.html → Open with Live Server
+```
+
+---
+
+##  License
+
+This project is for educational purposes.
+
+---
+
+## Acknowledgements
+
+- [Google Gemini AI](https://ai.google.dev/) — Essay scoring and report generation
+- [Firebase](https://firebase.google.com/) — Authentication and Firestore database
+- [NLTK](https://www.nltk.org/) — Natural language processing
+- [Chart.js](https://www.chartjs.org/) — Interactive charts
+- [Syne Font](https://fonts.google.com/specimen/Syne) — Display typography
+
+---
+
+<div align="center">
+  Built with ⚡ by Sakshi Krishnani
+</div>
